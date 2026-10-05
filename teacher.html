@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FF8A5B">
+<title>SEL 教師後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#FFF7EA;--card:#fff;--ink:#2A2440;--muted:#7A7391;--line:#F1E6D4;
+  --coral:#FF6B6B;--orange:#FF9F45;--yellow:#FFD93D;--green:#3DBE74;--blue:#4D96FF;--purple:#9B72F2;
+  --ok:#3DBE74;--late:#FF9F45;--abs:#FF5A5F;--leave:#9B72F2;--shadow:0 6px 20px rgba(255,140,90,.14);color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.5;padding-bottom:84px;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(120deg,#FF6B6B,#FF9F45 55%,#FFC93D);color:#fff;padding:12px 0 12px;box-shadow:0 4px 14px rgba(255,107,107,.25)}
+header h1{margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px}
+header h1 small{font-size:12px;font-weight:700;opacity:.9}
+header .demo{margin-left:auto;font-size:11px;background:#fff;color:var(--coral);border-radius:99px;padding:2px 8px;font-weight:900}
+.pick{display:grid;grid-template-columns:auto 1fr;gap:8px;margin-top:10px}
+.pick input,.pick select{width:100%;font:inherit;font-size:15px;font-weight:700;padding:8px 10px;border-radius:12px;border:0;background:rgba(255,255,255,.95);color:var(--ink)}
+.cinfo{font-size:12px;margin-top:8px;opacity:.95;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cinfo .warn{background:#fff;color:var(--coral);border-radius:99px;padding:0 8px;font-weight:900}
+.tab{display:none;padding-top:14px}.tab.on{display:block}
+.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:16px;margin:0 0 10px;font-weight:900}
+.card h2 small{font-weight:500;color:var(--muted);font-size:12px;margin-left:4px}
+.muted{color:var(--muted);font-size:12px}
+
+/* 即時點名 */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:0;border-radius:18px;padding:10px 6px;text-align:center;font:inherit;cursor:pointer;color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.06);border:3px solid transparent}
+.kpi.on{border-color:var(--ink)}
+.kpi .n{font-family:"Baloo 2",sans-serif;font-size:32px;font-weight:800;line-height:1}
+.kpi .l{font-size:12px;font-weight:900}
+.kpi .l small{display:block;font-weight:500;font-size:10px;color:var(--muted)}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--line);margin-top:12px}
+.bar i{display:block;transition:width .5s}
+.tools{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.tools input[type=search]{flex:1;min-width:140px;font:inherit;font-size:14px;padding:9px 12px;border-radius:12px;border:2px solid var(--line);background:#FFFCF6}
+.pillbtn{border:2px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
+.pillbtn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.live .led{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(61,190,116,.6);animation:led 1.6s infinite}
+.live.off .led{background:#C9C3D6;animation:none}
+@keyframes led{70%{box-shadow:0 0 0 8px rgba(61,190,116,0)}100%{box-shadow:0 0 0 0 rgba(61,190,116,0)}}
+.list{margin-top:10px}
+.stu{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:16px;background:#fff;margin:8px 0;box-shadow:0 2px 0 var(--line);cursor:pointer;border-left:6px solid var(--line);transition:transform .1s}
+.stu:active{transform:scale(.98)}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;flex:none;background:#F4EFE7}
+.who{flex:1;min-width:0}
+.who b{font-size:15px}
+.who .meta{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flags{font-size:14px}
+.st{text-align:right;flex:none}
+.pill{display:inline-block;font-size:12px;font-weight:900;padding:2px 10px;border-radius:99px;color:#fff;white-space:nowrap}
+.st .tm{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:16px}
+
+/* 底部抽屜 */
+.sheetbg{position:fixed;inset:0;background:rgba(42,36,64,.4);z-index:40;display:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:#fff;border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto;transform:translateY(105%);transition:transform .25s}
+.sheet.on{transform:none}.sheetbg.on{display:block}
+.sheet .grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:-6px auto 10px}
+.sheet h3{margin:0;font-size:20px}
+.detail{background:#FFF7EA;border-radius:14px;padding:10px 12px;font-size:13px;margin:10px 0}
+.sbtns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.sbtn{border:0;border-radius:14px;padding:12px;font:inherit;font-size:15px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.sbtn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none;grid-column:span 2;font-size:13px}
+
+/* 情緒 */
+.meter{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;max-width:420px;margin:0 auto;border:4px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.meter .qd{position:absolute;width:50%;height:50%;padding:8px;font-size:12px;font-weight:900;color:rgba(0,0,0,.5)}
+.qd.a{left:0;top:0;background:#FFD3D1}.qd.b{right:0;top:0;background:#FFF0B3;text-align:right}
+.qd.c{left:0;bottom:0;background:#D6E6FF;display:flex;align-items:end}.qd.d{right:0;bottom:0;background:#D2F2DF;display:flex;align-items:end;justify-content:end}
+.pt{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pt span{position:absolute;left:14px;top:-4px;font-size:10px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.85);border-radius:6px;padding:0 4px}
+.bars .row{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px;font-weight:700}
+.bars .row span:first-child{width:100px}
+.bars .track{flex:1;height:14px;background:var(--line);border-radius:7px;overflow:hidden}
+.bars .fill{height:100%;border-radius:7px}
+.bars b{width:30px;text-align:right}
+.alert{border-left:5px solid var(--abs);padding:8px 12px;margin:8px 0;background:#FFF7EA;border-radius:12px;font-size:13px}
+
+/* 統計 */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:700;font-size:12px}
+td.n{text-align:center;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.low{color:var(--abs);font-weight:900}
+
+/* 設定 */
+label{display:block;font-size:13px;font-weight:900;margin:12px 0 4px}
+label small{font-weight:500;color:var(--muted)}
+.inp{width:100%;font:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:#FFFCF6;color:var(--ink)}
+.inp:focus{outline:none;border-color:var(--orange)}
+textarea.inp{min-height:150px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{margin:0}
+.days input{display:none}
+.days span{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:2px solid var(--line);font-weight:900;cursor:pointer;background:#fff}
+.days input:checked+span{background:var(--orange);border-color:var(--orange);color:#fff}
+.grid3{display:grid;grid-template-columns:repeat(2,1fr);gap:0 10px}
+.btn{display:inline-block;border:0;border-radius:14px;padding:11px 16px;font:inherit;font-size:15px;font-weight:900;color:#fff;cursor:pointer;background:linear-gradient(120deg,var(--coral),var(--orange));box-shadow:0 4px 0 #E0554F;margin-top:12px}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.sm{padding:6px 12px;font-size:13px;margin-top:0}
+.btn:disabled{opacity:.5}
+.ccard{display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:#FFF7EA;margin:8px 0}
+.ccard .info{flex:1;min-width:0}
+.ccard b{font-size:15px}
+.preview{font-size:12px;margin-top:8px}
+.preview table{font-size:12px}
+.msg{font-size:13px;font-weight:700;margin-top:8px}
+.qr{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.qr .code{background:#fff;padding:8px;border-radius:12px;border:2px solid var(--line)}
+.qr .link{font-size:12px;word-break:break-all;flex:1;min-width:180px}
+
+/* 底部導覽 */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;box-shadow:0 -4px 16px rgba(0,0,0,.06);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+nav .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav button{border:0;background:none;font:inherit;font-size:11px;font-weight:700;color:var(--muted);padding:4px;cursor:pointer;border-radius:12px;line-height:1.3}
+nav button .i{display:block;font-size:22px}
+nav button.on{color:var(--coral);background:#FFF0E6}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:99px;padding:8px 16px;font-size:13px;font-weight:700;z-index:50;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🏅 SEL 教師後台 <small>Teacher</small><span class="demo" id="demoTag">示範資料 Demo</span></h1>
+    <div class="pick">
+      <input type="date" id="date" aria-label="日期">
+      <select id="course" aria-label="課程"></select>
+    </div>
+    <div class="cinfo" id="cinfo"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 即時點名 -->
+  <section class="tab on" id="t-live">
+    <div class="card">
+      <div class="kpis" id="kpis"></div>
+      <div class="bar" id="bar"></div>
+      <div class="tools">
+        <input type="search" id="q" placeholder="🔍 姓名／學號">
+        <span class="live" id="live"><span class="led"></span><span id="liveTxt"></span></span>
+        <button class="pillbtn" id="refresh">↻</button>
+      </div>
+      <div class="tools" id="sortBtns">
+        <span class="muted">排序 Sort</span>
+        <button class="pillbtn on" data-s="status">狀態 Status</button>
+        <button class="pillbtn" data-s="sid">學號 ID</button>
+        <button class="pillbtn" data-s="time">時間 Time</button>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="card" id="outsideCard" style="display:none"><h2>🙋 名單外的點名 <small>Not on roster</small></h2><div id="outside"></div></div>
+  </section>
+
+  <!-- 情緒 -->
+  <section class="tab" id="t-mood">
+    <div class="card"><h2>班級情緒地圖 <small>Class mood map</small></h2>
+      <div class="meter" id="map"><div class="qd a">警戒紅 Red</div><div class="qd b">活力黃 Yellow</div><div class="qd c">低能藍 Blue</div><div class="qd d">平靜綠 Green</div></div>
+      <p class="muted" style="text-align:center">橫軸 愉快度 → ｜ 縱軸 能量 ↑</p></div>
+    <div class="card"><h2>象限分布 <small>Zones</small></h2><div class="bars" id="bars"></div>
+      <p class="muted" id="avgBody"></p></div>
+    <div class="card"><h2>🔔 需要關心 <small>Needs attention</small></h2><div id="alerts"></div></div>
+  </section>
+
+  <!-- 統計 -->
+  <section class="tab" id="t-stats">
+    <div class="card"><h2>累計出席 <small id="sess"></small></h2>
+      <div class="scroll"><table><thead><tr><th>學號</th><th>姓名</th><th>✅ 準時</th><th>⏰ 遲到</th><th>📝 請假</th><th>❌ 未到</th><th>出席率</th></tr></thead><tbody id="stats"></tbody></table></div>
+      <button class="btn ghost" id="csv">⬇️ 下載 CSV（可用 Excel 開啟）</button>
+      <p class="muted">也可在 Google 試算表上方選單「SEL點名 → 更新出席統計」產生逐次出席表。出席率 =（準時＋遲到）÷ 上課次數。</p>
+    </div>
+  </section>
+
+  <!-- 設定 -->
+  <section class="tab" id="t-setup">
+    <div class="card">
+      <h2>🔌 連線設定 <small>Connection</small></h2>
+      <label>Apps Script 網址 <small>（留空 = 示範資料）</small></label>
+      <input class="inp" id="url" placeholder="https://script.google.com/macros/s/.../exec">
+      <label>教師密碼 <small>TEACHER_KEY</small></label>
+      <input class="inp" id="key" type="password">
+      <label>學生點名頁網址 <small>（用來產生各班 QR Code，例如 GitHub Pages 網址）</small></label>
+      <input class="inp" id="stuUrl" placeholder="https://你的帳號.github.io/sel-checkin/">
+      <button class="btn" id="saveConn">儲存並連線</button>
+      <div class="msg" id="connMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>📚 我的課程 <small>Courses</small></h2>
+      <div id="clist"></div>
+      <button class="btn ghost" id="newCourse">＋ 新增課程</button>
+    </div>
+
+    <div class="card" id="formCard">
+      <h2 id="formTitle">＋ 新增課程與學生名單</h2>
+      <label>課程班別名稱</label>
+      <input class="inp" id="fName" placeholder="例：體育-籃球 週一 3-4 節">
+      <label>上課星期 <small>可複選</small></label>
+      <div class="days" id="fDays"></div>
+      <div class="grid3">
+        <div><label>上課時間</label><input class="inp" id="fStart" type="time"></div>
+        <div><label>下課時間</label><input class="inp" id="fEnd" type="time"></div>
+        <div><label>節次</label><input class="inp" id="fPeriod" placeholder="例：3-4"></div>
+        <div><label>遲到寬限（分鐘）</label><input class="inp" id="fGrace" type="number" min="0" value="5"></div>
+      </div>
+      <p class="muted">學生在「上課時間 + 寬限分鐘」之後送出點名，會自動記為「遲到」。</p>
+      <label>學生名單 <small>從 Excel 直接複製貼上：系級｜學號｜姓名（每人一行）</small></label>
+      <textarea class="inp" id="fRoster" placeholder="體育系二年級	411200001	王小明
+體育系二年級	411200002	李小華
+教育系一年級	411300015	陳大文"></textarea>
+      <label style="font-weight:500">或上傳 CSV 檔：<input type="file" id="fFile" accept=".csv,.txt"></label>
+      <div class="preview" id="fPreview"></div>
+      <button class="btn" id="fSave">💾 儲存課程與名單</button>
+      <button class="btn ghost" id="fCancel" style="display:none">取消編輯</button>
+      <div class="msg" id="fMsg"></div>
+    </div>
+
+    <div class="card" id="qrCard">
+      <h2>📱 學生點名 QR Code <small>本班專屬連結</small></h2>
+      <div id="qrBox" class="muted">請先在上方填入「學生點名頁網址」並選擇課程。</div>
+    </div>
+  </section>
+</main>
+
+<nav><div class="in">
+  <button data-tab="live" class="on"><span class="i">📋</span>即時點名</button>
+  <button data-tab="mood"><span class="i">😊</span>情緒</button>
+  <button data-tab="stats"><span class="i">📊</span>統計</button>
+  <button data-tab="setup"><span class="i">⚙️</span>名單設定</button>
+</div></nav>
+
+<div class="sheetbg" id="sheetbg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const st = { get(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
+const QC = {'Q1 活力黃':'#FFC300','Q2 警戒紅':'#FF5A5F','Q3 低能藍':'#4D96FF','Q4 平靜綠':'#3DBE74'};
+const QE = {'Q1 活力黃':'🤩','Q2 警戒紅':'😤','Q3 低能藍':'😔','Q4 平靜綠':'😌'};
+const QN = {'Q1 活力黃':'Yellow','Q2 警戒紅':'Red','Q3 低能藍':'Blue','Q4 平靜綠':'Green'};
+const S = { // 出席狀態
+  '準時':{c:'var(--ok)',bg:'#DDF6E7',i:'✅',en:'On time'},
+  '遲到':{c:'var(--late)',bg:'#FFEBD6',i:'⏰',en:'Late'},
+  '請假':{c:'var(--leave)',bg:'#EEE6FF',i:'📝',en:'Leave'},
+  '未到':{c:'var(--abs)',bg:'#FFE1E0',i:'❌',en:'Absent'},
+};
+const WD = ['','一','二','三','四','五','六','日'];
+const today = () => new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+
+let D = null;            // 後台資料
+let filter = '', sortBy = 'status', timer = null;
+const isDemo = () => !st.get('t_url');
+
+/* ---------- API（未設定網址時使用示範資料）---------- */
+const api = {
+  async get(p){
+    if (isDemo()) return demo.get(p);
+    const q = new URLSearchParams({ key: st.get('t_key'), ...p });
+    return (await fetch(st.get('t_url') + '?' + q)).json();
+  },
+  async post(body){
+    if (isDemo()) return demo.post(body);
+    const r = await fetch(st.get('t_url'), { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ key: st.get('t_key'), ...body }) });
+    return r.json();
+  }
+};
+
+/* ---------- 示範資料 ---------- */
+const demo = (() => {
+  const names = ['王小明','李小華','陳大文','林怡君','張家豪','黃雅婷','吳承恩','劉育成','蔡佩珊','楊志明','許文馨','鄭宇翔','謝欣怡','郭俊宏','洪詩涵','曾柏翰','邱子晴','廖冠宇','賴品妤','周皓軒'];
+  const db = {
+    courses: [{ name:'體適能｜週四 8-9 節', days:[4], start:'16:10', end:'18:00', period:'8-9', grace:5 },
+              { name:'體適能｜週五 1-2 節', days:[5], start:'08:10', end:'10:00', period:'1-2', grace:5 },
+              { name:'體適能｜週五 3-4 節', days:[5], start:'10:10', end:'12:00', period:'3-4', grace:5 }],
+    roster: {}, records: [], fixes: []
+  };
+  db.roster[db.courses[0].name] = names.map((n,i) => ({ cls: i%3 ? '體育系二年級' : '教育系一年級', sid: '4112000' + String(i+1).padStart(2,'0'), name: n }));
+  db.roster[db.courses[1].name] = names.slice(0,12).map((n,i) => ({ cls:'外文系三年級', sid:'4103000'+String(i+1).padStart(2,'0'), name:n }));
+  db.roster[db.courses[2].name] = names.slice(4,18).map((n,i) => ({ cls:'資管系一年級', sid:'4114000'+String(i+1).padStart(2,'0'), name:n }));
+  const QK = Object.keys(QC), d0 = today();
+  db.roster[db.courses[0].name].slice(0,15).forEach((s,i) => {
+    const v = 1 + (i*7)%10, a = 1 + (i*3)%10, q = a>5 ? (v>5?QK[0]:QK[1]) : (v>5?QK[3]:QK[2]);
+    const late = i >= 12;
+    db.records.push({ date:d0, time: late ? `10:${17+i}` : `10:0${i%10}`, course: db.courses[0].name, dept:s.cls, sid:s.sid, name:s.name,
+      status: late ? '遲到' : '準時', valence:v, arousal:a, quadrant:q, emotions:['平靜(Calm)','興奮(Excited)','疲累(Tired)','緊張(Nervous)'][i%4],
+      body: 2 + i%8, injury: i===3, note: i===5 ? '最近睡不好' : '', care: i===5 });
+  });
+  db.records.push({ date:d0, time:'10:06', course: db.courses[0].name, dept:'資工系一年級', sid:'411999001', name:'旁聽生', status:'準時', valence:7, arousal:7, quadrant:QK[0], emotions:'開心(Pleased)', body:8, injury:false, note:'', care:false });
+  db.fixes.push({ date:d0, course: db.courses[0].name, sid:'411200017', status:'請假' });
+  return {
+    get(p){
+      const course = p.course || db.courses[0].name, date = p.date;
+      const roster = db.roster[course] || [];
+      const recs = db.records.filter(r => r.course === course);
+      const sessions = 6;
+      return { ok:true, date, course,
+        courses: db.courses.map(c => ({ ...c, count: (db.roster[c.name]||[]).length })),
+        roster, records: recs.filter(r => r.date === date), fixes: db.fixes.filter(f => f.course === course && f.date === date),
+        sessions, stats: roster.map((s,i) => ({ sid:s.sid, name:s.name, cls:s.cls, onTime: 6-(i%4), late: i%4===1?1:0, leave: i%7===0?1:0, absent: (i%4)-(i%4===1?1:0)-(i%7===0?1:0) < 0 ? 0 : (i%4)-(i%4===1?1:0)-(i%7===0?1:0), total: sessions })) };
+    },
+    post(b){
+      if (b.action === 'mark') { db.fixes = db.fixes.filter(f => !(f.date===b.date && f.course===b.course && f.sid===b.sid)); if (b.status) db.fixes.push({ date:b.date, course:b.course, sid:b.sid, status:b.status }); }
+      if (b.action === 'saveCourse') {
+        const c = b.course, old = c.oldName || c.name;
+        db.courses = db.courses.filter(x => x.name !== old && x.name !== c.name); db.courses.push({ name:c.name, days:c.days, start:c.start, end:c.end, period:c.period, grace:c.grace });
+        db.roster[c.name] = b.roster || db.roster[old] || []; if (old !== c.name) delete db.roster[old];
+      }
+      if (b.action === 'deleteCourse') { db.courses = db.courses.filter(x => x.name !== b.name); delete db.roster[b.name]; }
+      return { ok:true };
+    }
+  };
+})();
+
+/* ---------- 載入 ---------- */
+async function load(silent){
+  if (!silent) setLive('載入中 Loading…');
+  try {
+    const d = await api.get({ date: $('date').value, course: $('course').value });
+    if (!d.ok) throw new Error(d.error);
+    D = d;
+    // 第一次開啟：自動切到「現在正在上」的課（週五 1-2、3-4 節連堂時選最接近的一堂）
+    if (!autoPicked) {
+      autoPicked = true;
+      const live = $('date').value === today() && pickLive(d.courses);
+      if (live && live.name !== d.course) { $('course').innerHTML = `<option selected>${esc(live.name)}</option>`; return load(silent); }
+    }
+    renderCourses(); renderAll();
+    setLive('更新 ' + new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}));
+  } catch (e) { setLive('⚠️ ' + e.message); toast('載入失敗：' + e.message); }
+}
+let autoPicked = false;
+function pickLive(list){
+  const now = new Date(), dow = now.getDay() || 7, m = now.getHours()*60 + now.getMinutes();
+  const toM = x => { const r = /(\d+):(\d+)/.exec(x||''); return r ? +r[1]*60 + +r[2] : null; };
+  let best = null, bd = 1e9;
+  list.forEach(c => {
+    const s0 = toM(c.start); if (s0 == null || !(c.days||[]).includes(dow)) return;
+    const e0 = toM(c.end) ?? s0 + 120;
+    if (m < s0 - 40 || m > e0) return;
+    if (Math.abs(m - s0) < bd) { bd = Math.abs(m - s0); best = c; }
+  });
+  return best;
+}
+function setLive(t){ $('liveTxt').textContent = t; }
+function startAuto(){ clearInterval(timer); timer = setInterval(() => { if (!document.hidden && $('t-live').classList.contains('on')) load(true); }, 15000); }
+
+/* ---------- 課程下拉與資訊 ---------- */
+function renderCourses(){
+  const cur = D.course;
+  $('course').innerHTML = D.courses.length ? D.courses.map(c => `<option value="${esc(c.name)}"${c.name===cur?' selected':''}>${esc(c.name)}</option>`).join('') : '<option value="">（尚無課程，請到「名單設定」新增）</option>';
+  const c = D.courses.find(x => x.name === cur);
+  const dow = new Date($('date').value + 'T00:00').getDay() || 7;
+  $('cinfo').innerHTML = c ? `🗓️ 週${(c.days||[]).map(x=>WD[x]).join('、') || '—'}　⏰ ${esc(c.start||'未設定')}${c.end?'–'+esc(c.end):''}　${c.period?'第 '+esc(c.period)+' 節　':''}遲到寬限 ${c.grace ?? 5} 分　👥 ${c.count} 人
+    ${c.days && c.days.length && !c.days.includes(dow) ? '<span class="warn">此日期非上課日</span>' : ''}` : '';
+  $('demoTag').style.display = isDemo() ? '' : 'none';
+  renderCourseList(); renderQR();
+}
+
+/* ---------- 計算每位學生今日狀態 ---------- */
+function people(){
+  const first = {};
+  D.records.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach(r => { if (!first[r.sid]) first[r.sid] = r; });
+  const fix = {}; D.fixes.forEach(f => fix[f.sid] = f.status);
+  const list = D.roster.map(s => {
+    const r = first[s.sid];
+    let status = fix[s.sid] || (r ? (r.status === '已到' ? '準時' : r.status) : '未到');
+    return { ...s, rec: r, status, manual: !!fix[s.sid] };
+  });
+  const rosterIds = new Set(D.roster.map(s => s.sid));
+  const outside = Object.values(first).filter(r => !rosterIds.has(r.sid));
+  return { list, outside };
+}
+
+function renderAll(){ renderLive(); renderMood(); renderStats(); }
+
+function renderLive(){
+  const { list, outside } = people();
+  const cnt = { '準時':0, '遲到':0, '請假':0, '未到':0 };
+  list.forEach(p => cnt[p.status]++);
+  const kp = [['準時','已到','On time'],['遲到','遲到','Late'],['未到','未到','Absent'],['請假','請假','Leave']];
+  $('kpis').innerHTML = kp.map(([k,zh,en]) => `<button class="kpi${filter===k?' on':''}" data-k="${k}" style="background:${S[k].bg}"><div class="n" style="color:${S[k].c}">${cnt[k]}</div><div class="l">${S[k].i} ${zh}<small>${en}</small></div></button>`).join('');
+  $('kpis').querySelectorAll('.kpi').forEach(b => b.onclick = () => { filter = filter === b.dataset.k ? '' : b.dataset.k; renderLive(); });
+  const n = list.length || 1;
+  $('bar').innerHTML = ['準時','遲到','請假','未到'].map(k => `<i style="width:${cnt[k]/n*100}%;background:${S[k].c}"></i>`).join('');
+
+  const q = $('q').value.trim().toLowerCase();
+  const order = { '未到':0, '遲到':1, '請假':2, '準時':3 };
+  let rows = list.filter(p => (!filter || p.status === filter) && (!q || p.name.toLowerCase().includes(q) || p.sid.includes(q)));
+  rows.sort(sortBy === 'sid' ? (a,b) => a.sid.localeCompare(b.sid)
+    : sortBy === 'time' ? (a,b) => (a.rec?.time || '99').localeCompare(b.rec?.time || '99')
+    : (a,b) => order[a.status] - order[b.status] || a.sid.localeCompare(b.sid));
+  $('list').innerHTML = !D.roster.length
+    ? `<div class="card empty">此課程還沒有學生名單 👉 請到「⚙️ 名單設定」匯入</div>`
+    : rows.length ? rows.map(p => stuRow(p)).join('') : `<div class="empty">沒有符合的學生</div>`;
+  $('list').querySelectorAll('.stu').forEach(el => el.onclick = () => openSheet(el.dataset.sid));
+
+  $('outsideCard').style.display = outside.length ? '' : 'none';
+  $('outside').innerHTML = outside.map(r => `<div class="stu" style="border-left-color:var(--blue)"><div class="av">${QE[r.quadrant]||'🙂'}</div><div class="who"><b>${esc(r.name)}</b><div class="meta">${esc(r.dept)}・${esc(r.sid)}</div></div><div class="st"><span class="pill" style="background:var(--blue)">${esc(r.time)}</span></div></div>`).join('');
+}
+function stuRow(p){
+  const s = S[p.status], r = p.rec;
+  const flags = r ? [r.care?'🆘':'', r.injury?'🩹':'', r.note?'💬':''].join('') : '';
+  return `<div class="stu" data-sid="${esc(p.sid)}" style="border-left-color:${s.c}">
+    <div class="av" style="background:${r ? QC[r.quadrant] + '33' : '#F4EFE7'}">${r ? (QE[r.quadrant]||'🙂') : '👤'}</div>
+    <div class="who"><b>${esc(p.name)}</b> <span class="flags">${flags}</span><div class="meta">${esc(p.cls)}・${esc(p.sid)}</div></div>
+    <div class="st"><span class="pill" style="background:${s.c}">${s.i} ${p.status}${p.manual?' ✎':''}</span><span class="tm">${r ? esc(r.time) : '—'}</span></div></div>`;
+}
+
+/* ---------- 底部抽屜：核對與修改狀態 ---------- */
+function openSheet(sid){
+  const p = people().list.find(x => x.sid === sid); if (!p) return;
+  const r = p.rec;
+  $('sheet').innerHTML = `<div class="grab"></div>
+    <h3>${esc(p.name)} <span class="pill" style="background:${S[p.status].c};font-size:13px;vertical-align:middle">${S[p.status].i} ${p.status}${p.manual?'（手動）':''}</span></h3>
+    <div class="muted">${esc(p.cls)}・${esc(p.sid)}</div>
+    ${r ? `<div class="detail">🕒 點名時間 <b>${esc(r.time)}</b>（系統判定：${esc(r.status)}）<br>
+      ${QE[r.quadrant]||''} ${esc(r.quadrant)}｜愉快 ${r.valence}・能量 ${r.arousal}<br>💭 ${esc(r.emotions)}<br>🏃 身體狀態 ${r.body}/10 ${r.injury?'・🩹 身體不適':''}
+      ${r.note?`<br>💬 ${esc(r.note)}`:''}${r.care?'<br>🆘 <b>希望老師關心</b>':''}</div>` : `<div class="detail">尚未點名 Not checked in yet</div>`}
+    <div class="sbtns">
+      ${['準時','遲到','請假','未到'].map(k => `<button class="sbtn" data-st="${k}" style="background:${S[k].c}">${S[k].i} ${k === '準時' ? '到（準時）' : k}</button>`).join('')}
+      ${p.manual ? `<button class="sbtn ghost" data-st="">↺ 取消手動修改，恢復系統判定</button>` : ''}
+      <button class="sbtn ghost" data-close="1">關閉</button>
+    </div>`;
+  $('sheet').querySelectorAll('[data-st]').forEach(b => b.onclick = () => mark(sid, b.dataset.st));
+  $('sheet').querySelector('[data-close]').onclick = closeSheet;
+  $('sheet').classList.add('on'); $('sheetbg').classList.add('on');
+}
+function closeSheet(){ $('sheet').classList.remove('on'); $('sheetbg').classList.remove('on'); }
+$('sheetbg').onclick = closeSheet;
+async function mark(sid, status){
+  // 先更新畫面，再寫回試算表
+  D.fixes = D.fixes.filter(f => f.sid !== sid); if (status) D.fixes.push({ sid, status });
+  closeSheet(); renderLive();
+  const res = await api.post({ action:'mark', date:$('date').value, course:D.course, sid, status });
+  toast(res.ok ? '✓ 已更新 Saved' : '⚠️ ' + res.error);
+}
+
+/* ---------- 情緒 ---------- */
+function renderMood(){
+  const recs = Object.values(D.records.reduce((m,r) => (m[r.sid] = r, m), {}));
+  const map = $('map'); map.querySelectorAll('.pt').forEach(p => p.remove());
+  const seen = {};
+  recs.forEach(r => {
+    const k = r.valence + ',' + r.arousal, j = seen[k] = (seen[k]||0) + 1, off = (j-1)*2;
+    const p = document.createElement('div'); p.className = 'pt';
+    p.style.left = ((r.valence-0.5)/10*100 + off) + '%'; p.style.top = ((10.5-r.arousal)/10*100 + off) + '%';
+    p.style.background = QC[r.quadrant] || '#888';
+    p.innerHTML = `<span>${esc(r.name)}</span>`;
+    map.appendChild(p);
+  });
+  const n = recs.length;
+  $('bars').innerHTML = Object.keys(QC).map(q => { const c = recs.filter(r => r.quadrant === q).length;
+    return `<div class="row"><span>${QE[q]} ${q.slice(3)} ${QN[q]}</span><div class="track"><div class="fill" style="width:${n?c/n*100:0}%;background:${QC[q]}"></div></div><b>${c}</b></div>`; }).join('');
+  $('avgBody').textContent = n ? `平均身體狀態 Avg. body readiness：${(recs.reduce((s,r)=>s+Number(r.body||0),0)/n).toFixed(1)} / 10` : '';
+  const al = recs.filter(r => r.care || r.injury || r.body <= 3 || (r.quadrant === 'Q3 低能藍' && r.valence <= 2) || r.note);
+  $('alerts').innerHTML = al.length ? al.map(r => {
+    const tags = [r.care && '🆘 希望老師關心', r.injury && '🩹 身體不適', r.body <= 3 && `身體狀態 ${r.body}`, r.quadrant==='Q3 低能藍' && r.valence <= 2 && '😔 情緒明顯低落'].filter(Boolean);
+    return `<div class="alert" style="border-color:${r.care?'var(--abs)':'var(--line)'}"><b>${esc(r.name)}</b>（${esc(r.sid)}）${tags.join('・')}${r.note?`<br>💬 ${esc(r.note)}`:''}</div>`;
+  }).join('') : '<div class="empty">目前沒有 🎉</div>';
+}
+
+/* ---------- 統計 ---------- */
+function renderStats(){
+  $('sess').textContent = `共 ${D.sessions} 次上課 sessions`;
+  const rows = D.stats.slice().sort((a,b) => a.sid.localeCompare(b.sid));
+  $('stats').innerHTML = rows.map(s => { const p = s.total ? Math.round((s.onTime + s.late) / s.total * 100) : 0;
+    return `<tr><td>${esc(s.sid)}</td><td><b>${esc(s.name)}</b></td><td class="n">${s.onTime}</td><td class="n">${s.late}</td><td class="n">${s.leave}</td><td class="n">${s.absent}</td><td class="n ${p<70?'low':''}">${p}%</td></tr>`; }).join('')
+    || '<tr><td colspan="7" class="empty">尚無資料</td></tr>';
+}
+$('csv').onclick = () => {
+  const head = ['課程','系級','學號','姓名','準時','遲到','請假','未到','上課次數','出席率'];
+  const lines = [head].concat(D.stats.map(s => [D.course, s.cls, s.sid, s.name, s.onTime, s.late, s.leave, s.absent, s.total, s.total ? Math.round((s.onTime+s.late)/s.total*100)+'%' : '0%']));
+  const csv = '﻿' + lines.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' })); a.download = `出席統計_${D.course}.csv`; a.click();
+};
+
+/* ---------- 設定：課程與名單 ---------- */
+$('fDays').innerHTML = [1,2,3,4,5,6,7].map(d => `<label><input type="checkbox" value="${d}"><span>${WD[d]}</span></label>`).join('');
+let editing = null;
+function renderCourseList(){
+  $('clist').innerHTML = D.courses.length ? D.courses.map(c => `<div class="ccard"><div class="info"><b>${esc(c.name)}</b><div class="muted">週${(c.days||[]).map(x=>WD[x]).join('、')||'—'} ${esc(c.start||'')}${c.end?'–'+esc(c.end):''} ${c.period?'・第'+esc(c.period)+'節':''}・👥 ${c.count} 人</div></div>
+    <button class="btn ghost sm" data-edit="${esc(c.name)}">編輯</button><button class="btn ghost sm" data-del="${esc(c.name)}">🗑</button></div>`).join('')
+    : '<div class="empty">還沒有課程，請在下方新增 👇</div>';
+  $('clist').querySelectorAll('[data-edit]').forEach(b => b.onclick = () => editCourse(b.dataset.edit));
+  $('clist').querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm(`確定刪除「${b.dataset.del}」與它的學生名單？（點名紀錄會保留）`)) return;
+    const r = await api.post({ action:'deleteCourse', name:b.dataset.del });
+    toast(r.ok ? '已刪除' : r.error); if ($('course').value === b.dataset.del) $('course').value = ''; load();
+  });
+}
+async function editCourse(name){
+  const c = D.courses.find(x => x.name === name); if (!c) return;
+  editing = name;
+  const d = name === D.course ? D : await api.get({ date:$('date').value, course:name });
+  $('formTitle').textContent = '✏️ 編輯：' + name;
+  $('fName').value = c.name; $('fStart').value = c.start || ''; $('fEnd').value = c.end || ''; $('fPeriod').value = c.period || ''; $('fGrace').value = c.grace ?? 5;
+  $('fDays').querySelectorAll('input').forEach(i => i.checked = (c.days||[]).includes(+i.value));
+  $('fRoster').value = d.roster.map(s => [s.cls, s.sid, s.name].join('\t')).join('\n');
+  $('fCancel').style.display = ''; parsePreview();
+  $('formCard').scrollIntoView({ behavior:'smooth' });
+}
+function resetForm(){
+  editing = null; $('formTitle').textContent = '＋ 新增課程與學生名單';
+  ['fName','fStart','fEnd','fPeriod','fRoster'].forEach(i => $(i).value = ''); $('fGrace').value = 5;
+  $('fDays').querySelectorAll('input').forEach(i => i.checked = false);
+  $('fCancel').style.display = 'none'; $('fPreview').innerHTML = ''; $('fMsg').textContent = '';
+}
+$('fCancel').onclick = resetForm;
+$('newCourse').onclick = () => { resetForm(); $('formCard').scrollIntoView({ behavior:'smooth' }); };
+
+// 解析名單：支援 Excel 貼上（Tab）、CSV（逗號）；自動辨識學號欄
+// 有標題列時依標題判斷欄位（學號／姓名／系級順序不拘）；沒有標題列時自動辨識學號欄
+let rosterDupes = [];
+function splitCells(line){
+  // 先切欄位再去除引號與空白（處理 "B154011034<Tab>" 這類 Excel 匯出的雜訊）
+  const sep = line.includes('\t') && !line.includes(',') ? /\t/ : /,|，/;
+  return line.split(sep).map(c => c.replace(/^\s*"|"\s*$/g,'').replace(/[\t\r]/g,'').trim());
+}
+function parseRoster(text){
+  const out = [], seen = new Map(); rosterDupes = [];
+  let col = null; // { sid, name, cls }
+  text.split(/\r?\n/).forEach(line => {
+    if (!line.trim()) return;
+    const cells = splitCells(line);
+    if (/學號|姓名|student|name/i.test(line) && !cells.some(c => /^[A-Za-z]{0,3}\d{4,}/.test(c))) {
+      const f = re => cells.findIndex(c => re.test(c));
+      col = { sid: f(/學號|student\s*id|^id$/i), name: f(/姓名|name/i), cls: f(/系級|系所|系別|班級|系|dept|department|class/i) };
+      return;
+    }
+    let sid, name, cls;
+    if (col && col.sid >= 0) {
+      sid = cells[col.sid] || ''; name = col.name >= 0 ? cells[col.name] || '' : ''; cls = col.cls >= 0 ? cells[col.cls] || '' : '';
+    } else {
+      const parts = cells.filter(Boolean);
+      const i = parts.findIndex(c => /^[A-Za-z]{0,3}\d{4,}[A-Za-z0-9]*$/.test(c));
+      if (i < 0) return;
+      sid = parts[i]; const rest = parts.filter((_, j) => j !== i);
+      name = rest[rest.length-1] || ''; cls = rest.length > 1 ? rest[0] : '';
+    }
+    sid = sid.replace(/\s+/g,'').toUpperCase();
+    if (!/^[A-Z]{0,3}\d{4,}[A-Z0-9]*$/.test(sid)) return;
+    if (seen.has(sid)) { rosterDupes.push(`${sid} ${name}`); return; }
+    seen.set(sid, 1);
+    out.push({ sid, name, cls });
+  });
+  return out;
+}
+function parsePreview(){
+  const r = parseRoster($('fRoster').value);
+  $('fPreview').innerHTML = r.length ? `<b>✓ 辨識到 ${r.length} 位學生</b>${rosterDupes.length ? `<div class="low">⚠️ 有 ${rosterDupes.length} 筆重複學號已略過：${esc(rosterDupes.join('、'))}</div>` : ''}<div class="scroll"><table><tr><th>系級</th><th>學號</th><th>姓名</th></tr>${r.slice(0,5).map(s => `<tr><td>${esc(s.cls)}</td><td>${esc(s.sid)}</td><td>${esc(s.name)}</td></tr>`).join('')}${r.length>5?`<tr><td colspan="3" class="muted">…還有 ${r.length-5} 位</td></tr>`:''}</table></div>` : ($('fRoster').value.trim() ? '<span class="low">找不到學號欄，請確認格式：系級、學號、姓名</span>' : '');
+}
+$('fRoster').oninput = parsePreview;
+// 自動辨識編碼：先試 UTF-8，若有亂碼就改用 Big5（Excel 繁中版存 CSV 的預設編碼）
+$('fFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    let text;
+    try { text = new TextDecoder('utf-8', { fatal: true }).decode(rd.result); }
+    catch (err) { text = new TextDecoder('big5').decode(rd.result); }
+    $('fRoster').value = text.replace(/^﻿/, ''); parsePreview();
+  };
+  rd.readAsArrayBuffer(f);
+  e.target.value = ''; // 允許重新選同一個檔案
+};
+$('fSave').onclick = async () => {
+  const name = $('fName').value.trim();
+  if (!name) { $('fMsg').innerHTML = '<span class="low">請輸入課程名稱</span>'; return; }
+  const roster = parseRoster($('fRoster').value);
+  const course = { name, oldName: editing || name, days: [...$('fDays').querySelectorAll('input:checked')].map(i => +i.value),
+    start: $('fStart').value, end: $('fEnd').value, period: $('fPeriod').value.trim(), grace: Number($('fGrace').value || 5) };
+  $('fSave').disabled = true; $('fMsg').textContent = '儲存中…';
+  const r = await api.post({ action:'saveCourse', course, roster });
+  $('fSave').disabled = false;
+  if (!r.ok) { $('fMsg').innerHTML = `<span class="low">${esc(r.error)}</span>`; return; }
+  toast(`✓ 已儲存「${name}」${roster.length} 位學生`);
+  resetForm(); $('course').innerHTML = `<option selected>${esc(name)}</option>`; load();
+};
+
+/* ---------- QR Code ---------- */
+function renderQR(){
+  const base = st.get('t_stu'), c = D && D.course;
+  if (!base || !c) return;
+  const link = base.replace(/[?#].*$/, '') + '?course=' + encodeURIComponent(c);
+  $('qrBox').innerHTML = `<div class="qr"><div class="code" id="qrc"></div><div class="link"><b>${esc(c)}</b><br><a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a><br><button class="btn ghost sm" id="copyLink" style="margin-top:8px">📋 複製連結</button></div></div><p class="muted">上課時投影這個 QR Code，學生掃描後課程會自動帶入。</p>`;
+  if (window.QRCode) new QRCode($('qrc'), { text: link, width: 140, height: 140, colorDark:'#2A2440' });
+  $('copyLink').onclick = () => navigator.clipboard.writeText(link).then(() => toast('已複製連結'));
+}
+
+/* ---------- 連線設定 ---------- */
+$('url').value = st.get('t_url'); $('key').value = st.get('t_key'); $('stuUrl').value = st.get('t_stu');
+$('saveConn').onclick = async () => {
+  st.set('t_url', $('url').value.trim()); st.set('t_key', $('key').value); st.set('t_stu', $('stuUrl').value.trim());
+  $('connMsg').textContent = '連線中…';
+  $('course').innerHTML = ''; await load();
+  $('connMsg').innerHTML = D ? (isDemo() ? '目前使用示範資料（未填網址）' : '✅ 連線成功') : '';
+};
+
+/* ---------- 其他 ---------- */
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 2200); }
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.id === 't-' + b.dataset.tab));
+  window.scrollTo({ top:0 });
+  if (b.dataset.tab === 'live') load(true);
+});
+$('sortBtns').onclick = e => { const b = e.target.closest('[data-s]'); if (!b) return; sortBy = b.dataset.s; $('sortBtns').querySelectorAll('[data-s]').forEach(x => x.classList.toggle('on', x === b)); renderLive(); };
+$('q').oninput = renderLive;
+$('refresh').onclick = () => load();
+$('date').onchange = () => load();
+$('course').onchange = () => { filter = ''; load(); };
+$('date').value = today();
+load(); startAuto();
+</script>
+</body>
+</html>

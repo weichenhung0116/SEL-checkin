@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FF8A5B">
+<title>SEL 情緒點名</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF7EA; --card:#FFFFFF; --ink:#2A2440; --muted:#7A7391; --line:#F1E6D4;
+  --coral:#FF6B6B; --orange:#FF9F45; --yellow:#FFD93D; --green:#6BCB77; --blue:#4D96FF; --purple:#9B72F2; --pink:#FF8FC7;
+  --shadow:0 8px 24px rgba(255,140,90,.15);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-tap-highlight-color:transparent;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,217,61,.35) 0 6px, transparent 7px),
+    radial-gradient(circle at 82% 8%, rgba(77,150,255,.25) 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 46%, rgba(255,107,107,.22) 0 4px, transparent 5px),
+    radial-gradient(circle at 24% 72%, rgba(107,203,119,.28) 0 5px, transparent 6px),
+    radial-gradient(circle at 90% 88%, rgba(155,114,242,.22) 0 6px, transparent 7px);
+  background-size:260px 260px;}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 48px}
+
+/* 標題橫幅 */
+.banner{position:relative;overflow:hidden;border-radius:24px;padding:18px 18px 16px;color:#fff;
+  background:linear-gradient(120deg,#FF6B6B 0%,#FF9F45 45%,#FFD93D 100%);box-shadow:var(--shadow)}
+.banner::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-36px;height:60px;border-radius:50%;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.25) 0 2px,transparent 2px 46px);opacity:.6}
+.banner .top{display:flex;align-items:flex-start;gap:10px;position:relative;z-index:1}
+.banner h1{margin:0;font-size:22px;font-weight:900;line-height:1.25;text-shadow:0 2px 0 rgba(0,0,0,.08)}
+.banner h1 .en{color:rgba(255,255,255,.9);font-size:13px;font-weight:700}
+.banner .sub{color:rgba(255,255,255,.95);font-size:12px;margin-top:4px}
+.banner .sub .en{color:rgba(255,255,255,.85)}
+.balls{position:absolute;right:12px;bottom:6px;display:flex;gap:6px;font-size:22px;z-index:1}
+.balls span{display:inline-block;animation:bounce 1.6s ease-in-out infinite}
+.balls span:nth-child(2){animation-delay:.2s}.balls span:nth-child(3){animation-delay:.4s}.balls span:nth-child(4){animation-delay:.6s}
+@keyframes bounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-10px)}}
+.en{display:block;font-size:.82em;font-weight:400;color:var(--muted);line-height:1.4}
+.lang{margin-left:auto;display:flex;background:rgba(255,255,255,.3);border-radius:99px;overflow:hidden;flex:none}
+.lang button{border:0;background:transparent;color:#fff;font:inherit;font-size:12px;font-weight:700;padding:5px 9px;cursor:pointer}
+.lang button.on{background:#fff;color:var(--coral)}
+
+/* 跑道進度條 */
+.track{position:relative;height:34px;margin:16px 4px 14px;border-radius:17px;
+  background:linear-gradient(#FF8A65,#FF7043);box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.track::before{content:"";position:absolute;left:14px;right:34px;top:50%;border-top:2px dashed rgba(255,255,255,.7)}
+.track .flag{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:18px}
+.track .pin{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#fff;opacity:.6}
+.track .runner{position:absolute;top:50%;font-size:24px;transform:translate(-50%,-58%) scaleX(-1);transition:left .6s cubic-bezier(.3,1.4,.5,1)}
+
+.card{position:relative;background:var(--card);border-radius:22px;padding:22px 20px 20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--coral),var(--orange),var(--yellow),var(--green),var(--blue),var(--purple))}
+.card h2{font-size:19px;margin:0 0 4px;line-height:1.35;font-weight:900}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:#FFF0D9;color:#E07B00;margin-bottom:8px}
+.tag .en{display:inline;font-size:inherit;font-weight:700;margin-left:4px;color:inherit;opacity:.75}
+.sub{color:var(--muted);font-size:13px;margin:0}
+label{display:block;font-size:14px;font-weight:700;margin:14px 0 6px}
+label .en{display:inline;margin-left:6px}
+input[type=text],select,textarea{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:#FFFCF6;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);background:#fff}
+textarea{min-height:72px;resize:vertical}
+.check{display:flex;align-items:center;gap:10px;font-size:14px;margin:12px 0 0;font-weight:400;cursor:pointer}
+.check .en{display:block;margin:0}
+.check input{width:22px;height:22px;accent-color:var(--coral);flex:none}
+.btn{display:block;width:100%;border:0;border-radius:16px;padding:13px;font:inherit;font-size:16px;font-weight:900;color:#fff;cursor:pointer;margin-top:18px;
+  background:linear-gradient(120deg,var(--coral),var(--orange));box-shadow:0 6px 0 #E0554F;transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #E0554F}
+.btn .en{color:rgba(255,255,255,.9);font-weight:700}
+.btn:disabled{background:#D9D3E3;box-shadow:0 6px 0 #C2BBCF;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);margin-top:12px}
+.btn.ghost .en{color:var(--muted)}
+.btn.blue{background:linear-gradient(120deg,#4D96FF,#9B72F2);box-shadow:0 6px 0 #3C74D6}
+.hidden{display:none!important}
+.err{color:var(--coral);font-size:13px;margin-top:8px;min-height:1em;font-weight:700}
+.hint{font-size:13px;font-weight:700;color:#E07B00;text-align:center;margin-top:10px}
+.hint .en{color:#E07B00;opacity:.8}
+
+/* 情緒地圖 */
+.meter{position:relative;aspect-ratio:1;border-radius:20px;overflow:hidden;margin:12px 0 4px;touch-action:none;cursor:crosshair;user-select:none;border:4px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.meter .qd{position:absolute;width:50%;height:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:900;font-size:16px;color:rgba(0,0,0,.55);transition:filter .25s}
+.meter .qd .en{color:rgba(0,0,0,.45);font-size:11px;font-weight:700}
+.qd.a{left:0;top:0;background:linear-gradient(135deg,#FF5A5F,#FF9A9E)}
+.qd.b{right:0;top:0;background:linear-gradient(225deg,#FFC300,#FFE57A)}
+.qd.c{left:0;bottom:0;background:linear-gradient(45deg,#4D96FF,#A8CBFF)}
+.qd.d{right:0;bottom:0;background:linear-gradient(315deg,#3DBE74,#A9EBC3)}
+.meter.dim .qd:not(.act){filter:saturate(.3) brightness(1.1)}
+.axis{position:absolute;background:rgba(255,255,255,.85)}
+.axis.x{left:0;right:0;top:50%;height:3px;margin-top:-1.5px}.axis.y{top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px}
+.dot{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:#fff;border:4px solid var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.3);transition:left .15s,top .15s;display:grid;place-items:center;font-size:19px;pointer-events:none;z-index:2}
+.dot.wait{animation:pulse 1.2s ease-in-out infinite;border-color:var(--orange)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.bubble{position:absolute;transform:translate(-50%,-100%);margin-top:-26px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;white-space:nowrap;pointer-events:none;transition:left .15s,top .15s;z-index:3;line-height:1.3;text-align:center}
+.bubble .en{color:#D6D0E6;font-size:10px}
+.meter.dragging .dot,.meter.dragging .bubble{transition:none}
+.axlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700}
+.axlbl .en{font-weight:400}
+.slider{margin-top:16px}
+.slider .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;font-weight:700}
+.slider .val{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:22px;color:var(--orange)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:7px;margin:8px 0 2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:#fff;border:5px solid var(--orange);box-shadow:0 3px 8px rgba(0,0,0,.2);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:5px solid var(--orange);cursor:pointer}
+#sV{background:linear-gradient(90deg,#4D96FF,#E8E3F0 50%,#FFC300)}
+#sA{background:linear-gradient(90deg,#A8CBFF,#E8E3F0 50%,#FF5A5F)}
+#sB{background:linear-gradient(90deg,#D9D3E3,#6BCB77)}
+.ends{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
+.ends span:last-child{text-align:right}
+.qbadge{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;margin-top:14px;font-size:14px;transition:background .25s;background:#FFF3E0}
+
+/* 情緒詞 */
+.wgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-top:10px}
+.wgrid h4{grid-column:1/-1;margin:10px 0 2px;font-size:14px}
+.w{min-width:0;overflow-wrap:anywhere;border:0;padding:7px 0;min-height:50px;font:inherit;font-size:12px;letter-spacing:-.03em;font-weight:700;line-height:1.25;cursor:pointer;color:var(--ink);border-radius:12px;position:relative;transition:transform .1s}
+.w:active{transform:scale(.94)}
+.w .en{font-size:9.5px;letter-spacing:0;color:rgba(42,36,64,.6)}
+.w.on{color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.w.on .en{color:rgba(255,255,255,.9)}
+.w.here::after{content:"📍";position:absolute;top:-6px;right:-3px;font-size:12px}
+.picked{font-size:13px;margin-top:10px;min-height:1.4em}
+.linkbtn{background:none;border:0;color:var(--blue);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:6px 0;margin-top:6px}
+.linkbtn .en{display:inline;margin-left:6px;color:inherit}
+
+/* 結果 */
+.ok{font-size:14px;font-weight:700;padding:12px 14px;border-radius:16px;margin-bottom:16px;display:flex;gap:10px;align-items:center}
+.ok .ic{font-size:28px}
+.hero{border-radius:22px;padding:22px 20px;margin-bottom:16px;color:var(--ink);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero h2{margin:0;font-size:22px;line-height:1.3;font-weight:900}
+.hero p{margin:6px 0 0;font-size:14px}
+.hero .en{color:rgba(42,36,64,.7)}
+.hero .big{font-size:44px;line-height:1}
+.strat{border-radius:16px;padding:12px 14px;margin:12px 0}
+.strat h3{font-size:15px;margin:0 0 4px}
+.strat ul{margin:0;padding-left:18px;font-size:14px}
+.strat li{margin:6px 0}
+.pe{background:#FFF3E0;border-radius:16px;padding:12px 14px;font-size:14px;margin-top:10px}
+
+/* 呼吸 */
+.seg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.seg button{border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;line-height:1.3}
+.seg button .en{font-size:10px}
+.seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg button.on .en{color:#D6D0E6}
+.stage{position:relative;height:290px;margin-top:12px;border-radius:20px;overflow:hidden;display:grid;place-items:center;transition:background 1.2s}
+.circle{width:170px;height:170px;border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:900;font-size:18px;color:#fff;transform:scale(.55);
+  transition:transform 4s ease-in-out, background 1.2s, box-shadow 1.2s;line-height:1.3;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+.circle .en{color:rgba(255,255,255,.9)}
+.ring{position:absolute;width:236px;height:236px;border-radius:50%;border:3px dashed rgba(255,255,255,.9);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seed{position:absolute;inset:0}
+.seed svg{width:100%;height:100%;display:block}
+.phase{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:rgba(255,255,255,.92);border-radius:99px;padding:4px 14px;font-weight:900;font-size:14px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:2}
+.phase .en{display:inline;margin-left:6px}
+.leaf,.petals{transform-box:fill-box;transition:transform 1s cubic-bezier(.3,1.5,.5,1)}
+.rain line{animation:drop .9s linear infinite;opacity:0;transition:opacity .4s}
+.raining .rain line{opacity:1}
+@keyframes drop{0%{transform:translateY(-6px)}100%{transform:translateY(70px)}}
+.rays{transform-origin:260px 46px;animation:spin 10s linear infinite}
+.sun{transition:opacity 1s}
+
+/* 運動小卡 */
+.draw{perspective:900px;margin:12px auto 0;max-width:320px}
+.flip{position:relative;transition:transform .7s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d;height:450px}
+.flip.turned{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;display:flex;flex-direction:column;align-items:center;padding:16px;text-align:center}
+.face.back{justify-content:center;cursor:pointer;color:#fff;border:6px solid #fff;box-shadow:var(--shadow);
+  background:conic-gradient(from 45deg,#FF6B6B,#FF9F45,#FFD93D,#6BCB77,#4D96FF,#9B72F2,#FF6B6B)}
+.face.back .inner{background:rgba(255,255,255,.92);color:var(--ink);border-radius:20px;padding:22px 26px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.face.back .big{font-size:56px;line-height:1;animation:bounce 1.6s ease-in-out infinite}
+.face.front{transform:rotateY(180deg);background:#FFFDF7;border:6px solid #fff;box-shadow:var(--shadow);color:var(--ink);justify-content:flex-start}
+.face.front svg{width:220px;height:220px;margin-top:4px;flex:none}
+.cardtop{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
+.sport{font-size:12px;font-weight:900;padding:3px 12px;border-radius:99px;color:var(--ink)}
+.season{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#fff;border:1.5px solid var(--line);color:var(--muted)}
+.quote{font-size:16px;font-weight:900;margin-top:4px;line-height:1.5;padding:0 4px}
+.quote .en{color:var(--muted);font-size:12.5px;font-weight:500;margin-top:4px}
+.cardfoot{position:absolute;left:14px;right:14px;bottom:10px;display:flex;justify-content:space-between;align-items:flex-end;font-size:10px;color:var(--muted)}
+.cardfoot .sig{font-family:"Baloo 2",sans-serif;font-style:italic;font-weight:600;letter-spacing:.02em}
+.cardfoot .no{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:12px;color:var(--orange)}
+
+/* PERMA 抽籤 */
+.perma{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pm{border:3px solid transparent;border-radius:18px;padding:10px 4px;font:inherit;cursor:pointer;text-align:center;line-height:1.3;color:var(--ink);transition:transform .15s}
+.pm:active{transform:scale(.95)}
+.pm b{display:block;font-family:"Baloo 2",sans-serif;font-size:30px;font-weight:800;line-height:1.1}
+.pm span{font-size:13px;font-weight:900}
+.pm .en{font-size:10px}
+.pm.on{border-color:var(--ink);transform:translateY(-2px)}
+.pdetail{margin-top:14px;padding:16px;border-radius:18px;text-align:center}
+.pdetail h3{margin:0 0 4px;font-size:17px}
+.pdetail p{margin:0 0 8px;font-size:13px}
+.cup{font-size:64px;line-height:1;display:inline-block;margin:6px 0}
+.cup.shake{animation:shake .12s ease-in-out infinite alternate}
+@keyframes shake{from{transform:rotate(-14deg) translateY(-2px)}to{transform:rotate(14deg) translateY(2px)}}
+.stick{margin:14px auto 0;max-width:300px;background:#fff;border-radius:16px;padding:16px 16px 14px;box-shadow:0 4px 0 rgba(0,0,0,.06);border:3px solid;position:relative;font-size:15px;font-weight:700;min-height:60px}
+.stick .no{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;color:#fff;padding:1px 10px;border-radius:99px;white-space:nowrap}
+.stick .en{font-weight:500}
+.stick.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.mission{margin-top:12px;font-size:13px;font-weight:700;background:#FFF8D6;border-radius:14px;padding:10px 12px}
+.row2{display:flex;gap:8px}
+.row2 .btn{margin-top:12px;font-size:14px;padding:11px}
+.foot{font-size:11px;color:var(--muted);text-align:center;margin-top:24px}
+.foot .en{font-size:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">
+    <div class="top">
+      <div>
+        <h1 data-t="SEL 情緒點名|SEL Mood Check-in"></h1>
+        <div class="sub" id="courseSub"></div>
+      </div>
+      <div class="lang" id="lang">
+        <button data-l="both">中/EN</button><button data-l="zh">中</button><button data-l="en">EN</button>
+      </div>
+    </div>
+    <div style="height:26px"></div>
+    <div class="balls"><span>🏀</span><span>⚽</span><span>🏸</span><span>🎾</span></div>
+  </div>
+
+  <div class="track" id="track">
+    <span class="pin" style="left:6%"></span><span class="pin" style="left:34%"></span><span class="pin" style="left:62%"></span><span class="pin" style="left:88%"></span>
+    <span class="runner" id="runner" style="left:6%">🏃</span><span class="flag">🏁</span>
+  </div>
+
+  <!-- STEP 1 點名 -->
+  <section id="step1" class="card">
+    <span class="tag" data-t="STEP 1 · 點名|Attendance"></span>
+    <h2 data-t="嗨！先確認你是誰 👋|Hi! Tell us who you are 👋"></h2>
+    <div id="courseBox">
+      <label for="course" data-t="課程班別|Class"></label>
+      <select id="course"></select>
+    </div>
+    <label for="dept" data-t="系級|Dept. & Year"></label>
+    <input type="text" id="dept" data-p="例：體育系二年級|e.g. PE, Year 2" autocomplete="organization">
+    <label for="sid" data-t="學號|Student ID"></label>
+    <input type="text" id="sid" data-p="例：411234567|e.g. 411234567" autocomplete="off">
+    <label for="name" data-t="姓名|Name"></label>
+    <input type="text" id="name" data-p="例：王小明|e.g. Wang Xiao-Ming" autocomplete="name">
+    <label class="check"><input type="checkbox" id="remember" checked><span data-t="記住我的資料（下次免填）|Remember me on this device"></span></label>
+    <div class="err" id="err1"></div>
+    <button class="btn" id="to2" data-t="下一步：情緒 Check-in →|Next: Mood check-in →"></button>
+  </section>
+
+  <!-- STEP 2 情緒象限 -->
+  <section id="step2" class="card hidden">
+    <span class="tag" data-t="STEP 2 · 自我覺察|Self-awareness"></span>
+    <h2 data-t="此刻的你，在哪個情緒象限？|Where are you on the mood meter right now?"></h2>
+    <p class="sub" data-t="拖動下方兩根拉桿，或直接在圖上點選／拖曳圓點|Move the two sliders, or tap / drag the dot on the map"></p>
+    <div class="axlbl" style="margin-top:12px"><span data-t="⚡ 高能量|⚡ High energy"></span></div>
+    <div class="meter" id="meter">
+      <div class="qd a" data-q="2" data-t="警戒紅|Red · Alert"></div>
+      <div class="qd b" data-q="1" data-t="活力黃|Yellow · Energized"></div>
+      <div class="qd c" data-q="3" data-t="低能藍|Blue · Low"></div>
+      <div class="qd d" data-q="4" data-t="平靜綠|Green · Calm"></div>
+      <div class="axis x"></div><div class="axis y"></div>
+      <div class="dot wait" id="dot">👆</div>
+      <div class="bubble hidden" id="bubble"></div>
+    </div>
+    <div class="axlbl"><span data-t="🌙 低能量 · 不愉快 ←|🌙 Low energy · Unpleasant ←"></span><span data-t="→ 愉快|→ Pleasant"></span></div>
+
+    <div class="slider">
+      <div class="row"><span data-t="😣 心情愉快度 😄|😣 Pleasantness 😄"></span><span class="val" id="vV">?</span></div>
+      <input type="range" id="sV" min="1" max="10" value="5" aria-label="Pleasantness">
+      <div class="ends"><span data-t="1 很不愉快|1 Very unpleasant"></span><span data-t="10 非常愉快|10 Very pleasant"></span></div>
+    </div>
+    <div class="slider">
+      <div class="row"><span data-t="🔋 身心能量（激發度）⚡|🔋 Energy (arousal) ⚡"></span><span class="val" id="vA">?</span></div>
+      <input type="range" id="sA" min="1" max="10" value="5" aria-label="Energy">
+      <div class="ends"><span data-t="1 非常低、想休息|1 Very low, need rest"></span><span data-t="10 非常高、很亢奮|10 Very high, wired"></span></div>
+    </div>
+    <div class="qbadge" id="qbadge"></div>
+    <button class="btn" id="to3" disabled data-t="下一步：替情緒命名 →|Next: Name your feelings →"></button>
+    <div class="hint" id="hint2" data-t="👆 請先拖動拉桿或圓點，找到你此刻的位置|👆 Move a slider or the dot first to find your spot"></div>
+    <button class="btn ghost" data-back="1" data-t="← 上一步|← Back"></button>
+  </section>
+
+  <!-- STEP 3 情緒詞 + 身體 -->
+  <section id="step3" class="card hidden">
+    <span class="tag" data-t="STEP 3 · 情緒命名|Name it"></span>
+    <h2 data-t="哪些詞最貼近你現在的感受？|Which words fit how you feel?"></h2>
+    <p class="sub" data-t="可複選。📍 是你在情緒地圖上的位置|Pick any. 📍 marks your spot on the mood meter"></p>
+    <div id="words"></div>
+    <button class="linkbtn" id="showAll"></button>
+    <div class="picked" id="picked"></div>
+    <input type="text" id="custom" data-p="其他感受（選填）|Other feelings (optional)" style="margin-top:6px">
+
+    <div class="slider" style="margin-top:22px">
+      <div class="row"><span data-t="🏃 今天身體狀態（適合運動的程度）|🏃 Body readiness for exercise today"></span><span class="val" id="vB">7</span></div>
+      <input type="range" id="sB" min="1" max="10" value="7" aria-label="Body">
+      <div class="ends"><span data-t="1 很疲累／不舒服|1 Exhausted / unwell"></span><span data-t="10 狀態極佳|10 Feeling great"></span></div>
+    </div>
+    <label class="check"><input type="checkbox" id="injury"><span data-t="今天身體有不適或受傷，需要調整活動|I'm unwell or injured and need to adjust activities"></span></label>
+
+    <label for="note" data-t="想對老師說的話（選填，只有老師看得到）|Anything to tell your teacher? (optional, private)"></label>
+    <textarea id="note" data-p="例如：今天睡不好、最近有點壓力…|e.g. didn't sleep well, feeling stressed lately…"></textarea>
+    <label class="check"><input type="checkbox" id="care"><span data-t="我希望老師私下關心我一下|I'd like my teacher to check in with me privately"></span></label>
+    <div class="err" id="err3"></div>
+    <button class="btn" id="submit" data-t="送出點名 ✓|Submit ✓"></button>
+    <button class="btn ghost" data-back="2" data-t="← 上一步|← Back"></button>
+  </section>
+
+  <!-- STEP 4 結果 -->
+  <section id="step4" class="hidden">
+    <div class="ok" id="okMsg"></div>
+    <div class="hero" id="hero"></div>
+    <div class="card" id="strategies"></div>
+
+    <div class="card">
+      <span class="tag" data-t="運動能量小卡|Sports energy card"></span>
+      <h2 data-t="抽一張今天的運動小卡 🎴|Draw today's sports card 🎴"></h2>
+      <p class="sub" data-t="50 種夏季與冬季運動，每張都有一句專屬的正能量語錄|50 summer & winter sports, each with its own boost of positivity"></p>
+      <div class="draw">
+        <div class="flip" id="flip">
+          <div class="face back" id="cardBack"><div class="inner"><div class="big">🎴</div><div style="font-weight:900;margin-top:10px" data-t="點我抽卡！|Tap to draw!"></div></div></div>
+          <div class="face front" id="cardFront"></div>
+        </div>
+      </div>
+      <button class="btn ghost" id="redraw" data-t="🔄 再抽一張|🔄 Draw again"></button>
+    </div>
+
+    <div class="card">
+      <span class="tag" data-t="一分鐘調適練習|1-minute reset"></span>
+      <h2 data-t="跟著呼吸，讓身心放鬆 🌬️|Breathe and reset 🌬️"></h2>
+      <div class="seg" id="vSeg">
+        <button data-v="seed" data-t="🌱 種子開花|🌱 Seed to flower"></button>
+        <button data-v="circle" data-t="⭕ 呼吸泡泡|⭕ Breathing bubble"></button>
+      </div>
+      <div class="seg" id="bSeg">
+        <button data-m="box" data-t="方塊呼吸 4-4-4-4|Box breathing"></button>
+        <button data-m="478" data-t="4-7-8 呼吸|4-7-8 breathing"></button>
+      </div>
+      <div class="stage" id="stage">
+        <div class="ring" id="ring"></div>
+        <div class="circle" id="circle"></div>
+        <div class="seed hidden" id="seed"></div>
+        <div class="phase" id="phase"></div>
+      </div>
+      <p class="sub" id="bInfo" style="text-align:center;margin-top:8px"></p>
+      <button class="btn blue" id="bStart"></button>
+    </div>
+
+    <div class="card">
+      <span class="tag" data-t="PERMA+ 幸福抽籤|PERMA+ well-being draw"></span>
+      <h2 data-t="幸福的六把鑰匙 🔑|Six keys to well-being 🔑"></h2>
+      <p class="sub" data-t="正向心理學家 Seligman 提出幸福由 PERMA 五個元素組成，PLUS 再加上身體活動、樂觀、營養與睡眠。先選今天最需要的一把鑰匙，再抽一支幸福籤！|Psychologist Martin Seligman's PERMA model has five elements of well-being; PLUS adds movement, optimism, nutrition and sleep. Pick the key you need most today, then draw a mission!"></p>
+      <div class="perma" id="perma"></div>
+      <div class="pdetail hidden" id="pdetail"></div>
+    </div>
+  </section>
+
+  <p class="foot" data-t="情緒沒有好壞，每一種都在告訴你一些事。本系統僅供課堂 SEL 練習，不能取代專業諮商；若持續感到低落或壓力，請聯繫學校諮商中心。情緒向度與調節策略參考：吳怡萱博士與標竿計畫（2021）、CASEL（2020）、Mood Meter（RULER）|There are no good or bad feelings—each one tells you something. This tool is for classroom SEL practice and is not a substitute for counseling. If you feel low or stressed for a long time, please reach out to the campus counseling center."></p>
+</div>
+
+<script>
+/* ========= 設定區（老師請修改）========= */
+const CONFIG = {
+  // 部署 Google Apps Script 後取得的網頁應用程式網址；留空 = 示範模式（不會送出）
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwN27ZfouzwHoLQ7qnS_Edd77TQXOoF9850dhAsXNL1-DJfX-dMorMWwSquzCcJvVYU/exec',
+  // 備用課程清單：連上後台後，會自動改用「教師後台 → 名單設定」裡建立的課程
+  COURSES: [
+    { name:'體適能｜週四 8-9 節', days:[4], start:'16:10', end:'18:00', period:'8-9' },
+    { name:'體適能｜週五 1-2 節', days:[5], start:'08:10', end:'10:00', period:'1-2' },
+    { name:'體適能｜週五 3-4 節', days:[5], start:'10:10', end:'12:00', period:'3-4' },
+  ],
+};
+/* ===================================== */
+
+/* ---------- 語言 ---------- */
+const store = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}, del(k){try{localStorage.removeItem(k)}catch(e){}} };
+let LANG = store.get('sel_lang') || 'both';
+const T = (zh, en) => LANG === 'zh' ? zh : LANG === 'en' ? en : `${zh}<span class="en">${en}</span>`;
+const t = p => T(p[0], p[1]);
+const plain = p => LANG === 'zh' ? p[0] : LANG === 'en' ? p[1] : `${p[0]} / ${p[1]}`;
+
+/* ---------- 情緒詞 10×10（Mood Meter）：GRID[列][欄]，列 0 = 能量 10，欄 0 = 愉快度 1 ---------- */
+const GRID = [
+ [['憤怒','Enraged'],['驚惶失措','Panicked'],['壓力很大','Stressed'],['緊張不安','Jittery'],['震驚','Shocked'],['驚喜','Surprised'],['振奮','Upbeat'],['歡慶','Festive'],['心花怒放','Exhilarated'],['欣喜若狂','Ecstatic']],
+ [['暴怒','Livid'],['氣沖沖','Furious'],['沮喪','Frustrated'],['神經緊繃','Tense'],['錯愕','Stunned'],['亢奮','Hyper'],['愉悅','Cheerful'],['有動力','Motivated'],['受到啟發','Inspired'],['興高采烈','Elated']],
+ [['火冒三丈','Fuming'],['受到驚嚇','Frightened'],['生氣','Angry'],['緊張','Nervous'],['坐立難安','Restless'],['精力充沛','Energized'],['生氣勃勃','Lively'],['興奮','Excited'],['樂觀','Optimistic'],['熱情洋溢','Enthusiastic']],
+ [['焦慮','Anxious'],['憂慮不安','Apprehensive'],['擔心','Worried'],['被激怒','Irritated'],['被惹惱','Annoyed'],['開心','Pleased'],['專注','Focused'],['快樂','Happy'],['驕傲','Proud'],['興奮激動','Thrilled']],
+ [['反感','Repulsed'],['困擾','Troubled'],['在意','Concerned'],['忐忑不安','Uneasy'],['不太高興','Peeved'],['令人愉快','Pleasant'],['欣喜','Joyful'],['有希望','Hopeful'],['好玩','Playful'],['幸福','Blissful']],
+ [['厭惡','Disgusted'],['死氣沉沉','Glum'],['失望','Disappointed'],['低落','Down'],['提不起勁','Apathetic'],['自在','At ease'],['隨和','Easygoing'],['知足','Content'],['充滿愛','Loving'],['心滿意足','Fulfilled']],
+ [['悲觀','Pessimistic'],['鬱鬱寡歡','Morose'],['洩氣','Discouraged'],['難過','Sad'],['無聊','Bored'],['平靜','Calm'],['安全','Secure'],['滿意','Satisfied'],['滿懷感謝','Grateful'],['感動','Touched']],
+ [['疏離','Alienated'],['悲慘','Miserable'],['孤單','Lonely'],['心灰意冷','Disheartened'],['疲累','Tired'],['放鬆','Relaxed'],['冷靜','Chill'],['寧靜','Restful'],['有福氣','Blessed'],['平衡','Balanced']],
+ [['消沉','Despondent'],['抑鬱','Depressed'],['悶悶不樂','Sullen'],['精疲力盡','Exhausted'],['疲勞','Fatigued'],['柔和','Mellow'],['周到','Thoughtful'],['平和','Peaceful'],['舒服','Comfy'],['無憂無慮','Carefree']],
+ [['絕望','Despairing'],['無望','Hopeless'],['孤寂','Desolate'],['疲憊不堪','Spent'],['被榨乾','Drained'],['昏昏欲睡','Sleepy'],['自鳴得意','Complacent'],['安寧','Tranquil'],['舒適','Cozy'],['安詳','Serene']],
+];
+const wordAt = (v, a) => GRID[10 - a][v - 1];
+const QRANGE = { 1:[0,5], 2:[0,0], 3:[5,0], 4:[5,5] }; // [起始列, 起始欄]
+
+/* ---------- 四象限與調節策略 ---------- */
+const QUADS = {
+  1:{key:'Q1 活力黃',name:['活力黃區','Yellow Zone'],sub:['高能量 + 愉快','High energy + Pleasant'],color:'#FFC300',soft:'#FFF4C2',light:'#FFF1B8',grad:'linear-gradient(135deg,#FFF1A8,#FFC300)',emoji:'🤩',
+     intro:['你現在充滿能量又愉快！這是學習新技能、挑戰自己的絕佳時機。','You feel energized and happy! It\'s a great time to learn new skills and challenge yourself.'],
+     strat:[
+      [['享受策略','Savoring'],[['品味當下：停下來 10 秒，專心感受此刻身體的輕快和心裡的喜悅。','Savor the moment: pause for 10 seconds and notice the lightness in your body and the joy you feel.'],['延長體驗：課後回想今天最開心的一刻，讓好心情停留久一點。','Extend it: after class, replay your best moment today so the good feeling lasts.']]],
+      [['分享策略','Sharing'],[['社會分享：和隊友分享一件今天的好事，喜悅分享後會加倍。','Share it: tell a teammate one good thing about today—joy doubles when shared.'],['感恩表達：對幫助過你的人說聲「謝謝」，加深彼此連結。','Express gratitude: thank someone who helped you; it strengthens your connection.']]],
+      [['建設策略','Building'],[['設定新目標：把興奮能量轉成行動——為今天的課設定一個小挑戰。','Set a new goal: turn excitement into action—set a small challenge for today\'s class.'],['技能發展：高能量時學習效率最好，試著練一個還不熟的動作。','Build skills: you learn best with high energy—practice a move you haven\'t mastered yet.']]]],
+     pe:['能量滿點很棒！熱身記得做足，留意動作安全與團隊節奏，別讓興奮變成衝動。','Full of energy—great! Warm up well, stay safe, keep pace with your team, and don\'t let excitement become impulsiveness.']},
+  2:{key:'Q2 警戒紅',name:['警戒紅區','Red Zone'],sub:['高能量 + 不愉快','High energy + Unpleasant'],color:'#FF5A5F',soft:'#FFE1DE',light:'#FFD6D3',grad:'linear-gradient(135deg,#FFC2BE,#FF7A7E)',emoji:'😤',
+     intro:['你可能正感受到壓力或某些需求受到阻礙。這些情緒很正常，它提醒你：有些事需要被照顧。','You may be under stress, or some of your needs are blocked. These feelings are normal—they signal that something needs care.'],
+     strat:[
+      [['行為策略','Behavioral'],[['放鬆訓練：試試下方的呼吸練習，或「握拳 5 秒、慢慢放開」的漸進式肌肉放鬆。','Relax: try the breathing exercise below, or progressive muscle relaxation—clench your fists for 5 seconds, then slowly release.'],['運動：今天的跑動與熱身是釋放緊張和壓力荷爾蒙的好機會。','Exercise: today\'s running and warm-up are a great way to release tension and stress hormones.'],['問題解決：寫下一個「現在就能做」的小步驟，先完成它。','Problem-solve: write down one small step you can take right now, and do it first.']]],
+      [['認知策略','Cognitive'],[['重新評估：問問自己「這件事一週後還會這麼重要嗎？」','Reappraise: ask yourself, "Will this still matter this much a week from now?"'],['接受：分辨「能改變」與「不能改變」的事，把力氣放在前者。','Accept: separate what you can change from what you can\'t, and put your energy into the first.'],['正向重構：這個挑戰可能讓我學到什麼？','Reframe: what could this challenge teach me?']]],
+      [['社會策略','Social'],[['尋求支持：找信任的朋友、家人或老師聊聊。','Seek support: talk with a trusted friend, family member or teacher.'],['表達情感：用說的或寫下來，適當抒發，不必硬撐。','Express it: say it or write it down—you don\'t have to hold it all in.']]]],
+     pe:['對抗性或競賽活動時多留意自己的情緒；需要暫停冷靜一下，隨時可以跟老師說。','Watch your emotions during competitive play; if you need a pause to cool down, tell your teacher anytime.']},
+  3:{key:'Q3 低能藍',name:['低能藍區','Blue Zone'],sub:['低能量 + 不愉快','Low energy + Unpleasant'],color:'#4D96FF',soft:'#DFEBFF',light:'#D6E6FF',grad:'linear-gradient(135deg,#CFE2FF,#7FB2FF)',emoji:'😔',
+     intro:['你現在可能有點累或心情低落。謝謝你誠實面對自己的感受——覺察本身就是第一步。','You might be tired or feeling down. Thank you for being honest with yourself—awareness is the first step.'],
+     strat:[
+      [['行為激活','Behavioral activation'],[['先動 5 分鐘就好：從低強度熱身開始，讓身體帶動心情，而不是等心情來了才動。','Just move for 5 minutes: start with a light warm-up and let your body lift your mood—don\'t wait for motivation first.'],['任務分解：把今天的課拆成幾個小目標，完成一個就肯定自己一次。','Break it down: split today\'s class into small goals and give yourself credit for each one.']]],
+      [['認知重構','Cognitive restructuring'],[['挑戰負面想法：留意「我總是…」「我一定不行…」這類念頭。','Challenge negative thoughts: notice thoughts like "I always…" or "I can never…".'],['平衡思考：換一句更完整的說法，例如「我今天比較累，但我還是來上課了」。','Think in balance: try a fuller statement, like "I\'m tired today, but I still showed up."']]],
+      [['社會連結','Social connection'],[['社交參與：今天找一位同學一起練習，就算只是簡單互動也有幫助。','Stay engaged: practice with a classmate today—even small interactions help.'],['幫助他人：幫隊友撿個球、加個油，助人能增加意義感。','Help others: pass a ball or cheer for a teammate—helping adds meaning.']]]],
+     pe:['身體累的話可以先降低強度，但盡量保持參與。如果低落持續好幾週，學校諮商中心隨時歡迎你。','If your body is tired, lower the intensity but try to keep participating. If the low mood lasts for weeks, the campus counseling center is always here for you.']},
+  4:{key:'Q4 平靜綠',name:['平靜綠區','Green Zone'],sub:['低能量 + 愉快','Low energy + Pleasant'],color:'#3DBE74',soft:'#D9F5E4',light:'#D2F2DF',grad:'linear-gradient(135deg,#C9F2D9,#6FD69B)',emoji:'😌',
+     intro:['你現在處在平穩、安心的狀態。這是覺察自己、累積心理資源的好時候。','You\'re calm and settled—a good time to reflect and build up your inner resources.'],
+     strat:[
+      [['維持策略','Maintaining'],[['正念練習：伸展時把注意力放在呼吸與肌肉的感覺上。','Mindfulness: while stretching, focus on your breath and how your muscles feel.'],['平衡生活：維持課業、休閒、社交與自我照顧的平衡。','Balance: keep a balance among study, leisure, friends and self-care.']]],
+      [['深化策略','Deepening'],[['感恩練習：想一件今天值得感謝的事，可以記在手機裡。','Gratitude: think of one thing you\'re thankful for today and note it on your phone.'],['意義建構：想想運動對你的意義——健康？夥伴？挑戰自我？','Find meaning: what does exercise mean to you—health, friends, personal challenge?']]],
+      [['準備策略','Preparing'],[['資源儲備：平穩時好好睡、好好吃、規律運動，為未來的壓力做準備。','Build reserves: sleep well, eat well and exercise regularly to prepare for future stress.'],['韌性培養：留意身邊需要幫忙的同學，展現社會覺察與關懷。','Build resilience: notice classmates who may need help—show social awareness and care.']]]],
+     pe:['狀態穩定，是專注練習技術細節的好時機；也可以多觀察、鼓勵隊友。','You\'re steady—a great time to focus on technique details, and to notice and encourage teammates.']}
+};
+
+/* ---------- PERMA+ ---------- */
+const PERMA = [
+  {k:'P',c:'#FFB800',bg:'#FFF4CC',name:['正向情緒','Positive Emotion'],desc:['體驗喜悅、感恩、希望、平靜等正向感受，並學會品味它們。','Experiencing joy, gratitude, hope and calm—and learning to savor them.'],
+   opts:[['寫下今天的三件好事','Write down three good things from today'],['真誠地對一個人說謝謝','Sincerely thank someone'],['聽一首讓你開心的歌','Listen to a song that lifts your mood'],['回想一個運動中最快樂的時刻','Recall your happiest moment in sports'],['看一段好笑的影片，大笑一下','Watch something funny and laugh out loud'],['到戶外曬 10 分鐘太陽','Get 10 minutes of sunshine outdoors'],['對自己說一句鼓勵的話','Say one encouraging thing to yourself'],['和朋友分享一個好消息','Share some good news with a friend'],['慢慢品嚐一份喜歡的點心','Slowly savor a snack you love'],['拍一張讓你微笑的照片','Take a photo of something that makes you smile']]},
+  {k:'E',c:'#FF5A5F',bg:'#FFE3E1',name:['投入','Engagement'],desc:['全心投入一件事、運用自己的優勢，進入忘記時間的「心流」。','Being fully absorbed and using your strengths—getting into "flow" where time flies.'],
+   opts:[['找一項讓你忘記時間的運動或活動','Find an activity where you lose track of time'],['練習時專注在一個動作細節','Focus on one technique detail while practicing'],['設定一個「剛好有點難」的挑戰','Set a challenge just slightly above your level'],['找出自己的一項優勢並刻意使用','Identify one of your strengths and use it on purpose'],['放下手機，專心做一件事 25 分鐘','Put your phone away and focus for 25 minutes'],['學一個新的運動技巧','Learn a new sports skill'],['跑步時用心感受呼吸與步伐','Mindfully notice your breath and stride while running'],['嘗試一項從沒玩過的運動','Try a sport you have never played'],['寫運動日誌，記錄進步','Keep a training log to track progress'],['把一個興趣變成小計畫','Turn a hobby into a small project']]},
+  {k:'R',c:'#4D96FF',bg:'#E0ECFF',name:['人際關係','Relationships'],desc:['擁有支持、信任、溫暖的人際連結，彼此陪伴與幫助。','Having supportive, trusting and warm connections with others.'],
+   opts:[['主動跟一位新同學打招呼','Say hi to a classmate you don\'t know yet'],['在比賽中為隊友加油','Cheer for your teammates during a game'],['約朋友一起去運動','Invite a friend to work out together'],['專心聽別人說話，不滑手機','Listen fully, with your phone away'],['傳訊息給好久沒聯絡的朋友','Message a friend you haven\'t talked to in a while'],['具體稱讚別人的努力','Give someone specific praise for their effort'],['分組時主動協調分工','Help organize roles in group work'],['和家人吃頓飯、聊聊天','Share a meal and a chat with family'],['幫助一位需要幫忙的人','Help someone who needs it'],['好球之後和隊友擊掌','High-five a teammate after a good play']]},
+  {k:'M',c:'#9B72F2',bg:'#EEE6FF',name:['意義','Meaning'],desc:['感覺自己屬於並服務比自己更大的事物，知道「為什麼而做」。','Belonging to and serving something bigger than yourself—knowing your "why".'],
+   opts:[['想一想：我為什麼運動？','Ask yourself: why do I exercise?'],['寫下你最重視的三個價值','Write down your top three values'],['參加一次志工服務','Volunteer once'],['教別人一項你會的技能','Teach someone a skill you have'],['想想今天的努力如何連結未來目標','Connect today\'s effort to a future goal'],['加入一個社團或運動隊伍','Join a club or sports team'],['為環境做件小事（撿垃圾、隨手關燈）','Do something small for the planet (pick up litter, turn off lights)'],['寫一封信給一年後的自己','Write a letter to yourself one year from now'],['了解一位運動員背後的故事','Learn the story behind an athlete you admire'],['睡前想想「今天我幫助了誰？」','Before bed, ask "Who did I help today?"']]},
+  {k:'A',c:'#3DBE74',bg:'#DDF6E7',name:['成就','Accomplishment'],desc:['設定目標並努力達成，體驗「我做得到」的勝任感。','Setting and reaching goals—feeling "I can do it."'],
+   opts:[['設定一個本週可達成的小目標','Set one small goal you can reach this week'],['把大目標拆成小步驟','Break a big goal into small steps'],['記錄並慶祝每個小進步','Track and celebrate small wins'],['完成一件拖延很久的事','Finish one thing you\'ve been putting off'],['挑戰自己的最佳紀錄','Try to beat your personal best'],['睡前列出今天的「完成清單」','Make a "done" list before bed'],['堅持一個 21 天小習慣','Stick with a mini habit for 21 days'],['寫下一個你曾克服的困難','Write about a challenge you overcame'],['主動請老師或教練給回饋','Ask your teacher or coach for feedback'],['完成目標後給自己一個獎勵','Reward yourself after reaching a goal']]},
+  {k:'+',c:'#FF8A3D',bg:'#FFE9D6',name:['身心基礎','PLUS basics'],desc:['身體活動、樂觀、營養與睡眠，是幸福感的身體基礎。','Physical activity, optimism, nutrition and sleep—the physical foundation of well-being.'],
+   opts:[['每天累積動 30 分鐘','Move for 30 minutes a day'],['走樓梯取代搭電梯','Take the stairs instead of the elevator'],['久坐每小時起來伸展 2 分鐘','Stand and stretch 2 minutes every hour'],['睡前 30 分鐘放下手機','Put your phone away 30 minutes before bed'],['固定時間睡覺和起床','Go to bed and wake up at regular times'],['今天喝足 1500 毫升的水','Drink 1,500 ml of water today'],['每餐都有蔬菜或水果','Have vegetables or fruit with every meal'],['好好吃一頓早餐','Eat a proper breakfast'],['把「我做不到」換成「我還在學」','Replace "I can\'t" with "I\'m still learning"'],['想像並寫下「最好的自己」','Imagine and write about your best possible self']]},
+];
+
+/* ---------- 50 種運動小卡（夏季 38 + 冬季 12）----------
+   [中文, English, 道具 emoji, 場景, 裝備, 姿勢, 季節, [語錄中, 語錄英]] */
+const SPORTS = [
+ ['籃球','Basketball','🏀','court','headband','up','S',['沒進的球，是下一球的練習。','Every missed shot is practice for the next one.']],
+ ['足球','Football','⚽','field','none','side','S',['一個人跑得快，一群人跑得遠。','Alone you run fast; together you run far.']],
+ ['排球','Volleyball','🏐','court','band','both','S',['接住彼此，就是最好的防守。','Catching each other is the best defense.']],
+ ['沙灘排球','Beach Volleyball','🏐','beach','cap','both','S',['腳下的沙再軟，也能跳得很高。','Even on soft sand, you can jump high.']],
+ ['網球','Tennis','🎾','court','cap','up','S',['深呼吸，下一分重新開始。','Breathe deep—the next point is a fresh start.']],
+ ['桌球','Table Tennis','🏓','court','none','side','S',['小小的球，也能打出大大的勇氣。','A tiny ball can carry big courage.']],
+ ['羽球','Badminton','🏸','court','headband','up','S',['放輕鬆，羽球也是飄著飛的。','Relax—even a shuttlecock floats.']],
+ ['棒球','Baseball','⚾','field','cap','up','S',['三振不可怕，不敢上場才可惜。','Striking out is okay; not stepping up is the real miss.']],
+ ['壘球','Softball','🥎','field','cap','side','S',['每一次揮棒，都是對自己的相信。','Every swing is a vote of confidence in yourself.']],
+ ['手球','Handball','🥅','court','band','side','S',['傳出去的球，會帶著信任回來。','A pass you give comes back with trust.']],
+ ['曲棍球','Field Hockey','🏑','field','headband','side','S',['穩穩地推進，就會靠近目標。','Push forward steadily, and you\'ll get closer.']],
+ ['橄欖球','Rugby Sevens','🏉','field','headband','up','S',['往前一步，也是了不起的進攻。','One step forward is still a great attack.']],
+ ['水球','Water Polo','🤽','water','swimcap','up','S',['在水裡也要抬起頭，看見隊友。','Even in deep water, keep your head up and see your team.']],
+ ['游泳','Swimming','💧','water','goggles','side','S',['累的時候，就讓水托住你。','When you\'re tired, let the water hold you up.']],
+ ['跳水','Diving','💦','water','swimcap','both','S',['勇敢跳下去，水花會為你鼓掌。','Leap bravely—the splash will cheer for you.']],
+ ['短跑','Sprint','👟','track','headband','side','S',['起跑慢一點沒關係，重要的是跑完。','A slow start is okay—what matters is finishing.']],
+ ['馬拉松','Marathon','🏅','track','cap','side','S',['一步一步，再遠的終點也會抵達。','Step by step, even the farthest finish line arrives.']],
+ ['跳高','High Jump','🌈','track','none','both','S',['橫桿每升高一點，你也長大一點。','Each time the bar rises, so do you.']],
+ ['跳遠','Long Jump','🦘','beach','headband','both','S',['助跑是準備，起跳是勇氣。','The run-up is preparation; the leap is courage.']],
+ ['撐竿跳','Pole Vault','🎋','sky','headband','up','S',['借一點力，你可以飛得比想像高。','With a little support, you can fly higher than you think.']],
+ ['鉛球','Shot Put','🟤','field','band','up','S',['把煩惱用力推出去吧！','Push your worries far away!']],
+ ['標槍','Javelin','🚀','field','headband','up','S',['瞄準方向，放手讓它飛。','Aim your direction, then let it fly.']],
+ ['競技體操','Artistic Gymnastics','🤸','mat','bow','both','S',['平衡不是不搖晃，而是搖晃後站穩。','Balance isn\'t never wobbling—it\'s steadying after you wobble.']],
+ ['韻律體操','Rhythmic Gymnastics','🎀','mat','bow','up','S',['跟著自己的節奏，就很美。','Moving to your own rhythm is beautiful.']],
+ ['彈翻床','Trampoline','☁️','sky','none','both','S',['落下，是為了彈得更高。','Coming down is how you bounce higher.']],
+ ['舉重','Weightlifting','🏋️','mat','band','both','S',['你比昨天的自己更有力量了。','You\'re stronger than you were yesterday.']],
+ ['拳擊','Boxing','🥊','mat','headband','up','S',['跌倒不算輸，站起來就贏了。','Falling isn\'t losing—getting up is winning.']],
+ ['柔道','Judo','🥋','mat','band','side','S',['學會跌倒，就不再害怕跌倒。','Learn to fall, and you won\'t fear falling.']],
+ ['跆拳道','Taekwondo','💥','mat','headband','up','S',['專注的一腳，勝過慌亂的十腳。','One focused kick beats ten panicked ones.']],
+ ['角力','Wrestling','💪','mat','headband','side','S',['撐住，再撐一下，你比想像中堅強。','Hold on a little longer—you\'re tougher than you think.']],
+ ['擊劍','Fencing','🤺','mat','none','side','S',['冷靜觀察，時機自然會出現。','Stay calm and watch—the right moment will come.']],
+ ['射箭','Archery','🏹','field','none','up','S',['心靜下來，目標就清楚了。','When your mind is still, the target becomes clear.']],
+ ['公路自行車','Road Cycling','🚲','track','helmet','side','S',['上坡很累，但風景都在坡頂。','Uphill is hard, but the view is at the top.']],
+ ['馬術','Equestrian','🐴','field','cap','side','S',['信任，是最好的夥伴關係。','Trust is the best partnership.']],
+ ['划船','Rowing','🚣','water','cap','side','S',['同一個節奏，船就跑得快。','In one rhythm, the boat flies.']],
+ ['帆船','Sailing','⛵','water','cap','side','S',['風向會變，調整帆就好。','The wind will change—just adjust your sails.']],
+ ['衝浪','Surfing','🏄','water','none','both','S',['浪來了，就站起來迎接它。','When the wave comes, stand up and ride it.']],
+ ['滑板','Skateboarding','🛹','sky','helmet','side','S',['失敗一百次，第一百零一次就成功。','Fail a hundred times; the 101st try lands.']],
+ ['運動攀登','Sport Climbing','🧗','mountain','helmet','up','S',['不用盯著山頂，先找下一個點。','Don\'t stare at the summit—find the next hold.']],
+ ['高爾夫','Golf','⛳','field','cap','side','S',['慢慢揮，專心在這一桿。','Swing slowly—focus on this one shot.']],
+ ['霹靂舞','Breaking','🎧','sky','cap','both','S',['做自己，就是最酷的動作。','Being yourself is the coolest move.']],
+ ['高山滑雪','Alpine Skiing','🎿','snow','beanie','side','W',['彎道多，才滑得有趣。','More turns make the ride more fun.']],
+ ['越野滑雪','Cross-Country Skiing','🌲','snow','beanie','side','W',['慢慢累積，耐力就是你的超能力。','Build it slowly—endurance is your superpower.']],
+ ['跳台滑雪','Ski Jumping','🦅','snow','helmet','both','W',['放下害怕，天空會接住你。','Let go of fear—the sky will catch you.']],
+ ['單板滑雪','Snowboard','🏂','snow','beanie','both','W',['跌在雪裡也很好玩，對吧？','Even falling in the snow is fun, right?']],
+ ['花式滑冰','Figure Skating','⛸️','ice','bow','both','W',['旋轉時找到一個焦點，就不會暈。','Find your focus point and you won\'t get dizzy.']],
+ ['競速滑冰','Speed Skating','⚡','ice','helmet','side','W',['壓低身體，加速前進！','Stay low and power forward!']],
+ ['冰球','Ice Hockey','🏒','ice','helmet','side','W',['和隊友一起，冰也會變溫暖。','With your team, even ice feels warm.']],
+ ['冰壺','Curling','🥌','ice','beanie','side','W',['輕輕推一把，剩下的交給隊友。','Give a gentle push—your team will do the rest.']],
+ ['雪橇','Luge','🛷','snow','helmet','side','W',['放鬆身體，速度自然會來。','Relax your body, and speed will follow.']],
+].map((s, i) => ({ no: i + 1, n: [s[0], s[1]], e: s[2], scene: s[3], gear: s[4], pose: s[5], season: s[6], q: s[7] }));
+
+const BODY = ['#FFB4A2','#B8E0D2','#FFD6A5','#BDE0FE','#E2C2FF','#CAFFBF','#FFC8DD','#FDFFB6','#A0E7E5','#FFDAC1'];
+const SCENE_BG = { court:'#FFE8CC', field:'#DDF6D2', track:'#FFE1D6', water:'#D6EEFF', beach:'#FFF1C9', mat:'#EDE3FF', sky:'#DDF0FF', mountain:'#E3F2E1', snow:'#EAF4FF', ice:'#E0FAFF' };
+
+/* 可愛圓滾滾吉祥物（純 SVG）：場景 + 裝備 + 姿勢 + 運動道具 */
+function mascot(s){
+  const ink = '#2B2D42', body = BODY[(s.no * 7) % BODY.length], uid = 'c' + s.no + Math.random().toString(36).slice(2,6);
+  const st = `stroke="${ink}" stroke-width="3.5"`;
+  let back = '', front = '';
+  switch (s.scene) {
+    case 'court': back = `<rect x="0" y="168" width="204" height="40" fill="#F6B97A"/><path d="M0 182h204M60 168v40M144 168v40" stroke="#fff" stroke-width="2" opacity=".7"/>`; break;
+    case 'field': back = `<rect x="0" y="166" width="204" height="40" fill="#8FD694"/><path d="M20 166l4-8 4 8M60 166l4-9 4 9M150 166l4-8 4 8M180 166l4-7 4 7" fill="#6BC071"/>`; break;
+    case 'track': back = `<rect x="0" y="166" width="204" height="40" fill="#FF8A65"/><path d="M0 178h204M0 190h204" stroke="#fff" stroke-width="2" stroke-dasharray="10 6"/>`; break;
+    case 'beach': back = `<rect x="0" y="166" width="204" height="40" fill="#FFD98E"/><circle cx="36" cy="40" r="14" fill="#FFD93D"/><path d="M150 60q10-8 20 0" stroke="#7CC6FE" stroke-width="3" fill="none"/>`; break;
+    case 'mat': back = `<rect x="16" y="166" width="172" height="16" rx="8" fill="#B79CF5"/><rect x="0" y="182" width="204" height="30" fill="#E3D7FF"/>`; break;
+    case 'sky': back = `<g fill="#fff"><ellipse cx="40" cy="48" rx="20" ry="10"/><ellipse cx="54" cy="42" rx="14" ry="10"/><ellipse cx="160" cy="150" rx="22" ry="10"/><ellipse cx="174" cy="144" rx="12" ry="9"/></g>`; break;
+    case 'mountain': back = `<path d="M-10 190L50 90l40 60 30-40 94 80z" fill="#A7D7A8"/><path d="M50 90l12 20-12-6-10 6z" fill="#fff"/>`; break;
+    case 'water': front = `<path d="M0 152q17-12 34 0t34 0 34 0 34 0 34 0 34 0V210H0z" fill="#7CC6FE" opacity=".9"/><path d="M0 166q17-10 34 0t34 0 34 0 34 0 34 0 34 0" stroke="#fff" stroke-width="2.5" fill="none" opacity=".8"/>`; break;
+    case 'snow': back = `<path d="M-10 176q60-30 120 0t120 0V210H-10z" fill="#fff"/><g fill="#9CC8F5" font-size="14">${[[24,40],[176,36],[150,96],[30,120],[96,24]].map(([x,y])=>`<text x="${x}" y="${y}">❄</text>`).join('')}</g>`; break;
+    case 'ice': back = `<ellipse cx="102" cy="180" rx="96" ry="20" fill="#BFF0FF"/><path d="M40 180h30M120 186h40" stroke="#fff" stroke-width="3" stroke-linecap="round"/><g fill="#fff">${[[30,50],[170,40],[160,120]].map(([x,y])=>`<path d="M${x} ${y-6}l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/>`).join('')}</g>`; break;
+  }
+  const blob = `<ellipse cx="82" cy="170" rx="13" ry="7" fill="${body}" ${st}/><ellipse cx="122" cy="170" rx="13" ry="7" fill="${body}" ${st}/><path d="M50 120c0-36 23-58 52-58s52 22 52 58-23 46-52 46-52-10-52-46z" fill="${body}" ${st}/>`;
+  const v = s.no % 4;
+  const eyes = v === 1 ? `<path d="M79 110q7-8 14 0M111 110q7-8 14 0" stroke="${ink}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+    : v === 2 ? `<ellipse cx="86" cy="108" rx="6" ry="7" fill="${ink}"/><circle cx="88" cy="105" r="2" fill="#fff"/><path d="M111 109q7 5 14 0" stroke="${ink}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+    : `<ellipse cx="86" cy="108" rx="6" ry="7" fill="${ink}"/><ellipse cx="118" cy="108" rx="6" ry="7" fill="${ink}"/><circle cx="88" cy="105" r="2" fill="#fff"/><circle cx="120" cy="105" r="2" fill="#fff"/>`;
+  const mouth = v === 3 ? `<path d="M94 120q8 12 16 0z" fill="#E5484D" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>` : `<path d="M95 121q7 8 14 0" stroke="${ink}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  const face = `${eyes}<ellipse cx="74" cy="124" rx="8" ry="5" fill="#FF8FAB" opacity=".6"/><ellipse cx="130" cy="124" rx="8" ry="5" fill="#FF8FAB" opacity=".6"/>${mouth}`;
+  const G = {
+    none:'',
+    headband:`<path d="M55 90q47-24 94 0" stroke="#FF5A5F" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M147 88l14-8M147 92l16 2" stroke="#FF5A5F" stroke-width="5" stroke-linecap="round"/>`,
+    cap:`<path d="M60 86q42-44 84 0z" fill="#4D96FF" ${st}/><path d="M140 84q22-2 30 6q-14 4-32 2z" fill="#4D96FF" ${st} stroke-linejoin="round"/><circle cx="102" cy="58" r="4" fill="#fff" ${st}/>`,
+    helmet:`<path d="M54 92q48-62 96 0z" fill="#FFC300" ${st}/><path d="M80 76l8-12M102 70V56M124 76l-8-12" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+    beanie:`<path d="M56 92q46-58 92 0z" fill="#FF8FC7" ${st}/><rect x="54" y="84" width="96" height="12" rx="6" fill="#fff" ${st}/><circle cx="102" cy="44" r="9" fill="#fff" ${st}/>`,
+    goggles:`<circle cx="86" cy="108" r="12" fill="#BDE0FE" fill-opacity=".55" stroke="#4D96FF" stroke-width="4"/><circle cx="118" cy="108" r="12" fill="#BDE0FE" fill-opacity=".55" stroke="#4D96FF" stroke-width="4"/><path d="M98 108h8M74 104l-22-4M130 104l22-4" stroke="#4D96FF" stroke-width="4"/>`,
+    swimcap:`<path d="M54 98q48-74 96 0q-48-14-96 0z" fill="#FF6B6B" ${st}/><circle cx="84" cy="74" r="4" fill="#fff"/>`,
+    bow:`<path d="M126 68l18-12v22zM126 68l-2 22 20-6z" fill="#FF8FC7" ${st} stroke-linejoin="round"/><circle cx="126" cy="70" r="5" fill="#FF5A9E" ${st}/>`,
+    band:`<rect x="140" y="132" width="14" height="10" rx="3" fill="#FFD93D" ${st} transform="rotate(-25 147 137)"/><rect x="50" y="132" width="14" height="10" rx="3" fill="#FFD93D" ${st} transform="rotate(25 57 137)"/>`,
+  };
+  const arm = (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="14" fill="${body}" ${st} transform="rotate(${r} ${x} ${y})"/>`;
+  let arms, px, py, ps;
+  if (s.pose === 'up') { arms = arm(50,130,25) + arm(156,96,35); px = 170; py = 64; ps = 40; }
+  else if (s.pose === 'both') { arms = arm(48,96,-35) + arm(156,96,35); px = 102; py = 32; ps = 40; }
+  else { arms = arm(50,130,25) + arm(154,130,-25); px = 168; py = 158; ps = 36; }
+  const prop = `<text x="${px}" y="${py}" font-size="${ps}" text-anchor="middle" dominant-baseline="central">${s.e}</text>`;
+  const sparkle = (x,y,c) => `<path d="M${x} ${y-8}l2.5 5.5 5.5 2.5-5.5 2.5-2.5 5.5-2.5-5.5-5.5-2.5 5.5-2.5z" fill="${c}"/>`;
+  return `<svg viewBox="0 0 204 204" aria-hidden="true"><defs><clipPath id="${uid}"><circle cx="102" cy="104" r="98"/></clipPath></defs>
+    <circle cx="102" cy="104" r="98" fill="${SCENE_BG[s.scene]}"/><g clip-path="url(#${uid})">${back}</g>
+    ${arms}${blob}${face}${G[s.gear]}${prop}${sparkle(30,80,'#FFC300')}${sparkle(178,124,'#FF8FC7')}
+    <g clip-path="url(#${uid})">${front}</g></svg>`;
+}
+
+/* ---------- 共用 ---------- */
+const $ = id => document.getElementById(id);
+const state = { v:5, a:5, q:null, touched:false, emotions:new Set(), showAll:false };
+let courseList = []; // 後台課程
+
+function applyLang(){
+  document.documentElement.lang = LANG === 'en' ? 'en' : 'zh-Hant';
+  document.querySelectorAll('[data-t]').forEach(el => el.innerHTML = t(el.dataset.t.split('|')));
+  document.querySelectorAll('[data-p]').forEach(el => el.placeholder = plain(el.dataset.p.split('|')));
+  $('lang').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.l === LANG));
+  updateCourseSub();
+  render();
+  if (!$('step3').classList.contains('hidden')) buildWords();
+  if (!$('step4').classList.contains('hidden')) showResult(lastData, lastMsg);
+  breathIdle();
+}
+$('lang').onclick = e => { const l = e.target.dataset.l; if (!l) return; LANG = l; store.set('sel_lang', l); applyLang(); };
+
+// ---- 課程 ----
+const params = new URLSearchParams(location.search);
+const fixedCourse = params.get('course');
+const WD = ['','一','二','三','四','五','六','日'], WDE = ['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function courseLabel(c){
+  if (!c || !c.start) return '';
+  const d = c.days || [];
+  return plain([`週${d.map(x=>WD[x]).join('、')} ${c.start}${c.period?'・第'+c.period+'節':''}`, `${d.map(x=>WDE[x]).join('/')} ${c.start}${c.period?' · P'+c.period:''}`]);
+}
+function updateCourseSub(){
+  const name = fixedCourse || $('course').value;
+  const c = courseList.find(x => x.name === name);
+  $('courseSub').innerHTML = (name ? `📍 ${esc(name)}${c && c.start ? '｜' + courseLabel(c) : ''}<br>` : '') + t(['體育課情緒 Check-in','PE Mood Check-in']);
+}
+function fillCourses(list){
+  $('course').innerHTML = list.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  // 自動選擇「今天、現在」正在上的課
+  const now = new Date(), dow = now.getDay() || 7, mins = now.getHours()*60 + now.getMinutes();
+  const toM = s => { const m = /(\d+):(\d+)/.exec(s||''); return m ? +m[1]*60 + +m[2] : null; };
+  // 同一天連堂（例如週五 1-2、3-4 節）時，選「上課時間最接近現在」的那一堂
+  let live = null, best = 1e9;
+  list.forEach(c => {
+    const s0 = toM(c.start); if (s0 == null || !(c.days||[]).includes(dow)) return;
+    const e0 = toM(c.end) ?? s0 + 120;
+    if (mins < s0 - 40 || mins > e0) return;
+    const diff = Math.abs(mins - s0); if (diff < best) { best = diff; live = c; }
+  });
+  const last = store.get('sel_course');
+  if (live) $('course').value = live.name;
+  else if (last && list.some(c => c.name === last)) $('course').value = last;
+  updateCourseSub();
+}
+$('course').onchange = updateCourseSub;
+if (fixedCourse) $('courseBox').classList.add('hidden');
+courseList = CONFIG.COURSES.map(c => typeof c === 'string' ? { name:c } : c);
+fillCourses(courseList);
+if (CONFIG.SCRIPT_URL) {
+  fetch(CONFIG.SCRIPT_URL + '?action=courses').then(r => r.json()).then(d => {
+    if (d.ok && d.courses.length) { courseList = d.courses; fillCourses(courseList); }
+  }).catch(() => {});
+}
+['dept','sid','name'].forEach(k => { const v = store.get('sel_'+k); if (v) $(k).value = v; });
+
+// ---- 步驟切換（跑道上的小人會往前跑）----
+function go(n){
+  [1,2,3,4].forEach(i => $('step'+i).classList.toggle('hidden', i!==n));
+  $('runner').style.left = [6,34,62,88][n-1] + '%';
+  $('runner').textContent = n === 4 ? '🙌' : '🏃';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => go(+b.dataset.back));
+
+$('to2').onclick = () => {
+  const dept=$('dept').value.trim(), sid=$('sid').value.trim(), name=$('name').value.trim();
+  if (!dept||!sid||!name) { $('err1').innerHTML=T('請完整填寫系級、學號、姓名','Please fill in department/year, student ID and name'); return; }
+  $('err1').textContent='';
+  if ($('remember').checked) { store.set('sel_dept',dept); store.set('sel_sid',sid); store.set('sel_name',name); }
+  else ['dept','sid','name'].forEach(k => store.del('sel_'+k));
+  go(2);
+};
+
+// ---- 情緒象限：必須先移動拉桿或圓點才能下一步 ----
+const meter=$('meter'), dot=$('dot'), bubble=$('bubble');
+function quadOf(v,a){ return a>5 ? (v>5?1:2) : (v>5?4:3); }
+function render(){
+  if (!state.touched) {
+    $('vV').textContent = '?'; $('vA').textContent = '?';
+    $('qbadge').innerHTML = `<span style="font-size:28px">🤔</span><div><b>${T('你現在的心情在哪裡呢？','Where is your mood right now?')}</b><span class="sub">${plain(['動一動拉桿或圓點來找找看','Move a slider or the dot to find it'])}</span></div>`;
+    return;
+  }
+  $('sV').value=state.v; $('sA').value=state.a; $('vV').textContent=state.v; $('vA').textContent=state.a;
+  const x = (state.v-0.5)/10*100, y = (10.5-state.a)/10*100;
+  dot.style.left = x+'%'; dot.style.top = y+'%';
+  const w = wordAt(state.v, state.a);
+  bubble.innerHTML = t(w);
+  bubble.style.left = Math.min(Math.max(x, 18), 82) + '%'; bubble.style.top = y + '%';
+  const q = quadOf(state.v,state.a), Q = QUADS[q];
+  if (state.q !== q) state.emotions.clear();
+  state.q = q;
+  dot.textContent = Q.emoji; dot.style.borderColor = Q.color;
+  meter.querySelectorAll('.qd').forEach(el => el.classList.toggle('act', +el.dataset.q===q));
+  $('qbadge').style.background = Q.soft;
+  $('qbadge').innerHTML = `<span style="font-size:30px">${Q.emoji}</span><div><b>${t(Q.name)}</b><span class="sub">${plain(Q.sub)}</span><div style="margin-top:4px">📍 ${T('最接近的詞：','Closest word: ')}<b>${plain(w)}</b></div></div>`;
+}
+function touch(){
+  if (state.touched) return;
+  state.touched = true;
+  dot.classList.remove('wait'); bubble.classList.remove('hidden'); meter.classList.add('dim');
+  $('to3').disabled = false; $('hint2').classList.add('hidden');
+}
+$('sV').oninput = e => { touch(); state.v=+e.target.value; render(); };
+$('sA').oninput = e => { touch(); state.a=+e.target.value; render(); };
+function fromPointer(e){
+  const r = meter.getBoundingClientRect();
+  const x = Math.min(Math.max((e.clientX-r.left)/r.width,0),0.999), y = Math.min(Math.max((e.clientY-r.top)/r.height,0),0.999);
+  touch(); state.v = Math.floor(x*10)+1; state.a = 10-Math.floor(y*10); render();
+}
+meter.addEventListener('pointerdown', e => { meter.setPointerCapture(e.pointerId); meter.classList.add('dragging'); fromPointer(e); });
+meter.addEventListener('pointermove', e => { if (meter.hasPointerCapture(e.pointerId)) fromPointer(e); });
+meter.addEventListener('pointerup', () => meter.classList.remove('dragging'));
+dot.style.left = '50%'; dot.style.top = '50%';
+
+// ---- 情緒詞（10×10 Mood Meter）----
+$('to3').onclick = () => {
+  if (!state.touched) return;
+  if (!state.emotions.size) state.emotions.add(`${10-state.a}-${state.v-1}`);
+  buildWords(); go(3);
+};
+function block(q){
+  const Q = QUADS[q], [r0,c0] = QRANGE[q], here = `${10-state.a}-${state.v-1}`;
+  let h = state.showAll ? `<h4 style="color:${Q.color}">${Q.emoji} ${plain(Q.name)}</h4>` : '';
+  for (let r=r0; r<r0+5; r++) for (let c=c0; c<c0+5; c++) {
+    const id = `${r}-${c}`, on = state.emotions.has(id);
+    h += `<button type="button" class="w${on?' on':''}${id===here?' here':''}" data-id="${id}" data-q="${q}" style="background:${on?Q.color:Q.light}">${t(GRID[r][c])}</button>`;
+  }
+  return h;
+}
+function buildWords(){
+  const order = state.showAll ? [state.q, ...[1,2,3,4].filter(q => q!==state.q)] : [state.q];
+  $('words').innerHTML = `<div class="wgrid">${order.map(block).join('')}</div>`;
+  $('showAll').innerHTML = state.showAll ? T('只顯示我的象限 ↑','Show my zone only ↑') : T('看全部 100 個情緒詞 ↓','See all 100 feeling words ↓');
+  $('words').querySelectorAll('.w').forEach(b => b.onclick = () => {
+    const id = b.dataset.id, Q = QUADS[b.dataset.q];
+    if (state.emotions.has(id)) { state.emotions.delete(id); b.classList.remove('on'); b.style.background = Q.light; }
+    else { state.emotions.add(id); b.classList.add('on'); b.style.background = Q.color; }
+    updatePicked();
+  });
+  updatePicked();
+}
+function emotionList(){ return [...state.emotions].map(id => { const [r,c] = id.split('-').map(Number); return GRID[r][c]; }); }
+function updatePicked(){
+  const l = emotionList();
+  $('picked').innerHTML = l.length ? `${plain(['已選','Selected'])}：<b>${l.map(plain).join('、')}</b>` : '';
+}
+$('showAll').onclick = () => { state.showAll = !state.showAll; buildWords(); };
+$('sB').oninput = e => $('vB').textContent = e.target.value;
+
+// ---- 送出 ----
+let lastData = null, lastMsg = null;
+$('submit').onclick = async () => {
+  const custom = $('custom').value.trim();
+  const emotions = emotionList().map(w => `${w[0]}(${w[1]})`); if (custom) emotions.push(custom);
+  if (!emotions.length) { $('err3').innerHTML=T('請至少選一個情緒詞，或自己寫一個','Please pick at least one word, or write your own'); return; }
+  $('err3').textContent='';
+  const course = fixedCourse || $('course').value;
+  store.set('sel_course', course);
+  const data = {
+    course, dept:$('dept').value.trim(), sid:$('sid').value.trim(), name:$('name').value.trim(),
+    valence:state.v, arousal:state.a, quadrant:QUADS[state.q].key, emotions,
+    body:+$('sB').value, injury:$('injury').checked, note:$('note').value.trim(), care:$('care').checked
+  };
+  const btn=$('submit'); btn.disabled=true; btn.innerHTML=T('送出中…','Submitting…');
+  let msg;
+  try {
+    const tm = new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+    if (!CONFIG.SCRIPT_URL) {
+      msg = {ic:'🧪', bg:'#FFF3E0', t:['示範模式：尚未設定 SCRIPT_URL，資料未送出','Demo mode: SCRIPT_URL not set, nothing was sent']};
+    } else {
+      const res = await fetch(CONFIG.SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(data) });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error||'server error');
+      msg = out.status === '遲到'
+        ? {ic:'⏰', bg:'#FFE9D6', t:[`${data.name}，${tm} 已完成點名（遲到登記）。沒關係，下次早點來一起熱身！`, `${data.name}, checked in at ${tm} (marked late). No worries—come a bit earlier next time to warm up together!`]}
+        : {ic:'🎉', bg:'#D9F5E4', t:[`點名成功！${data.name}，${tm} 已報到`, `Checked in! ${data.name}, ${tm}`]};
+      if (out.nameMatched) msg.t = [msg.t[0] + `（學號似乎打錯了，已用姓名找到你，正確學號是 ${out.sid}）`, msg.t[1] + ` (Your student ID looked wrong; we found you by name — your ID is ${out.sid}.)`];
+      if (out.corrected) msg.t = [msg.t[0] + `（你選的課程不在修課名單中，已自動改記到你修的「${out.corrected}」）`, msg.t[1] + ` (Recorded under your enrolled class "${out.corrected}".)`];
+      else if (out.inRoster === false) msg.t = [msg.t[0] + '（提醒：你不在此課程名單內，請確認課程是否選對）', msg.t[1] + ' (Note: you\'re not on this class roster—please check the class.)'];
+    }
+  } catch(err) {
+    btn.disabled=false; btn.innerHTML=T('送出點名 ✓','Submit ✓');
+    $('err3').innerHTML=T('送出失敗，請確認網路後再試一次','Submission failed—check your connection and try again')+`（${esc(err.message)}）`;
+    return;
+  }
+  btn.disabled=false; btn.innerHTML=T('送出點名 ✓','Submit ✓');
+  lastData = data; lastMsg = msg;
+  showResult(data, msg);
+  go(4);
+};
+
+function showResult(d, msg){
+  const Q = QUADS[state.q];
+  $('okMsg').style.background = msg.bg;
+  $('okMsg').innerHTML = `<span class="ic">${msg.ic}</span><div>${t(msg.t.map(esc))}</div>`;
+  $('hero').style.background = Q.grad;
+  const words = emotionList().map(plain); const custom = $('custom').value.trim(); if (custom) words.push(esc(custom));
+  $('hero').innerHTML = `<div class="big">${Q.emoji}</div><h2>${T('你在「'+Q.name[0]+'」','You\'re in the '+Q.name[1])}</h2><p><b>${words.join('、')}</b></p><p>${t(Q.intro)}</p>`;
+  $('strategies').innerHTML = `<span class="tag">${T('STEP 4 · 自我管理','Self-management')}</span><h2>${T('給你的身心調適方法 💡','Strategies for you 💡')}</h2>` +
+    Q.strat.map(([title,items]) => `<div class="strat" style="background:${Q.soft}"><h3 style="color:${Q.color}">${t(title)}</h3><ul>${items.map(i=>`<li>${t(i)}</li>`).join('')}</ul></div>`).join('') +
+    `<div class="pe">🏃 <b>${T('今日體育課小提醒：','Today\'s PE tip: ')}</b>${t(Q.pe)}${d.body<=4||d.injury?'<br>💡 '+T('你今天身體狀態偏低，可以和老師討論調整運動強度。','Your energy is low today—talk with your teacher about adjusting the intensity.'):''}</div>`;
+  if (!breathInit) { setMode(state.q===2||state.q===3 ? '478' : 'box'); breathInit = true; }
+  renderPerma();
+  if (currentCard) $('cardFront').innerHTML = cardHTML(currentCard);
+}
+
+// ---- 運動小卡 ----
+let currentCard = null, deck = [];
+function cardHTML(s){
+  const season = s.season === 'W' ? plain(['❄️ 冬季項目','❄️ Winter sport']) : plain(['☀️ 夏季項目','☀️ Summer sport']);
+  return `<div class="cardtop"><span class="sport" style="background:${BODY[(s.no*7)%BODY.length]}">${plain(s.n)}</span><span class="season">${season}</span></div>
+    ${mascot(s)}<div class="quote">${t(s.q)}</div>
+    <div class="cardfoot"><span class="sig">design by wei chen PE</span><span class="no">No.${String(s.no).padStart(2,'0')} / ${SPORTS.length}</span></div>`;
+}
+function drawCard(){
+  if (!deck.length) deck = SPORTS.map((_, i) => i).sort(() => Math.random() - .5); // 50 張抽完才會重複
+  currentCard = SPORTS[deck.pop()];
+  $('cardFront').innerHTML = cardHTML(currentCard);
+  $('flip').classList.add('turned');
+}
+$('cardBack').onclick = drawCard;
+$('redraw').onclick = () => {
+  if (!$('flip').classList.contains('turned')) return drawCard();
+  $('flip').classList.remove('turned');
+  setTimeout(drawCard, 450);
+};
+
+// ---- 呼吸練習：呼吸泡泡（色彩變化）＋ 種子開花 ----
+const PH = { in:{c:'#4D96FF',c2:'#7FD3FF',bg:'linear-gradient(180deg,#DDF0FF,#FFF7EA)',t:['吸氣','Inhale']},
+             hold:{c:'#9B72F2',c2:'#FF8FC7',bg:'linear-gradient(180deg,#F1E8FF,#FFF7EA)',t:['屏息','Hold']},
+             out:{c:'#FF9F45',c2:'#FFD93D',bg:'linear-gradient(180deg,#E6EEF7,#FFF7EA)',t:['吐氣','Exhale']} };
+const MODES = { box:[['in',4],['hold',4],['out',4],['hold',4]], '478':[['in',4],['hold',7],['out',8]] };
+let mode='box', visual = store.get('sel_visual') || 'seed', timer=null, breathInit=false, scaleNow=.55;
+
+$('seed').innerHTML = `<svg viewBox="0 0 320 290" preserveAspectRatio="xMidYMid slice">
+  <g class="sun" id="sun"><g class="rays">${Array.from({length:12},(_,i)=>`<line x1="${260+Math.cos(i*Math.PI/6)*26}" y1="${46+Math.sin(i*Math.PI/6)*26}" x2="${260+Math.cos(i*Math.PI/6)*36}" y2="${46+Math.sin(i*Math.PI/6)*36}" stroke="#FFC300" stroke-width="4" stroke-linecap="round"/>`).join('')}</g>
+    <circle cx="260" cy="46" r="20" fill="#FFD93D"/><path d="M252 44q2-3 4 0M264 44q2-3 4 0M254 52q6 5 12 0" stroke="#E07B00" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+  <g id="cloud"><ellipse cx="70" cy="48" rx="34" ry="16" fill="#fff"/><ellipse cx="92" cy="38" rx="22" ry="16" fill="#fff"/><ellipse cx="54" cy="40" rx="16" ry="12" fill="#fff"/>
+    <g class="rain" stroke="#4D96FF" stroke-width="3" stroke-linecap="round">${[44,60,76,92,108,52,84,100].map((x,i)=>`<line x1="${x}" y1="66" x2="${x-3}" y2="76" style="animation-delay:${(i*0.11).toFixed(2)}s"/>`).join('')}</g></g>
+  <path d="M0 246q80-26 160-6t160-4V290H0z" fill="#B98552"/><path d="M0 252q80-22 160-4t160-6" stroke="#8FD694" stroke-width="10" fill="none"/>
+  <ellipse id="seedBody" cx="160" cy="240" rx="10" ry="7" fill="#8B5A2B" stroke="#5A3A1A" stroke-width="2" style="transition:opacity 1s"/>
+  <path id="stem" d="M160 238 C 154 204, 168 174, 160 134 S 158 100, 160 88" stroke="#3DBE74" stroke-width="6" fill="none" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="transition:stroke-dashoffset 1s linear"/>
+  <path class="leaf" id="lf0" d="M158 216q-26-10-34 6q20 6 34-6z" fill="#6BCB77" stroke="#3DBE74" stroke-width="2" style="transform-origin:right center;transform:scale(0)"/>
+  <path class="leaf" id="lf1" d="M162 190q26-12 36 4q-20 8-36-4z" fill="#6BCB77" stroke="#3DBE74" stroke-width="2" style="transform-origin:left center;transform:scale(0)"/>
+  <path class="leaf" id="lf2" d="M158 160q-24-12-32 4q18 6 32-4z" fill="#8FD694" stroke="#3DBE74" stroke-width="2" style="transform-origin:right center;transform:scale(0)"/>
+  <path class="leaf" id="lf3" d="M162 130q22-12 30 2q-18 8-30-2z" fill="#8FD694" stroke="#3DBE74" stroke-width="2" style="transform-origin:left center;transform:scale(0)"/>
+  <g class="petals" id="flower" style="transform-origin:center;transform:scale(0)">
+    ${Array.from({length:8},(_,i)=>{const x=160+Math.cos(i*Math.PI/4)*16, y=84+Math.sin(i*Math.PI/4)*16; return `<ellipse cx="${x}" cy="${y}" rx="11" ry="8" fill="${i%2?'#FF8FC7':'#FFB4D6'}" transform="rotate(${i*45} ${x} ${y})"/>`;}).join('')}
+    <circle cx="160" cy="84" r="11" fill="#FFD93D" stroke="#FF9F45" stroke-width="2"/><path d="M155 83q1.5-2 3 0M162 83q1.5-2 3 0M156 88q4 3 8 0" stroke="#2B2D42" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>
+  <g id="sparks" style="transition:opacity .6s" opacity="0">${[[120,74,'#FFC300'],[204,68,'#FF8FC7'],[132,114,'#9B72F2'],[192,108,'#4D96FF']].map(([x,y,c])=>`<path d="M${x} ${y-8}l2.5 5.5 5.5 2.5-5.5 2.5-2.5 5.5-2.5-5.5-5.5-2.5 5.5-2.5z" fill="${c}"/>`).join('')}</g>
+</svg>`;
+
+function grow(g){ // g：0（種子）→ 1（開花）
+  $('stem').style.strokeDashoffset = 100 - Math.min(g / .85, 1) * 100;
+  $('seedBody').style.opacity = g > .05 ? .5 : 1;
+  [.15,.3,.45,.6].forEach((th,i) => $('lf'+i).style.transform = `scale(${g >= th ? 1 : 0})`);
+  $('flower').style.transform = `scale(${g < .78 ? 0 : g < 1 ? .45 + (g-.78)/.22*.4 : 1})`;
+  $('sparks').setAttribute('opacity', g >= 1 ? 1 : 0);
+}
+function setPhase(kind){
+  const p = PH[kind];
+  $('stage').style.background = p.bg;
+  $('circle').style.background = `radial-gradient(circle at 35% 30%, ${p.c2}, ${p.c})`;
+  $('circle').style.boxShadow = `0 0 0 16px ${p.c}33, 0 0 0 32px ${p.c}1a`;
+  $('sun').style.opacity = kind === 'out' ? .3 : 1;           // 吸氣、屏息：陽光滋潤
+  $('seed').classList.toggle('raining', kind === 'out');      // 吐氣：雨水灌溉
+}
+function setVisual(v){
+  visual = v; store.set('sel_visual', v);
+  $('vSeg').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('seed').classList.toggle('hidden', v !== 'seed');
+  $('circle').classList.toggle('hidden', v !== 'circle');
+  $('ring').classList.toggle('hidden', v !== 'circle');
+}
+function setMode(m){ mode=m; $('bSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===m)); stopBreath(); }
+$('bSeg').onclick = e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); };
+$('vSeg').onclick = e => { const b = e.target.closest('button'); if (b) setVisual(b.dataset.v); };
+function breathIdle(){
+  if (timer) return;
+  $('circle').innerHTML = T('準備','Ready'); $('bStart').innerHTML = T('▶ 開始','▶ Start');
+  $('phase').innerHTML = T('按下開始','Press start');
+  $('bInfo').innerHTML = T('跟著節奏呼吸 3 輪：吸氣時陽光照耀，吐氣時雨水灌溉，看種子長成一朵花 🌸','Breathe for 3 rounds: sunshine as you inhale, rain as you exhale—watch the seed bloom 🌸');
+}
+function stopBreath(){
+  clearTimeout(timer); timer=null; scaleNow=.55;
+  $('circle').style.transitionDuration = '1s'; $('circle').style.transform='scale(.55)';
+  setPhase('in'); $('seed').classList.remove('raining'); grow(0);
+  breathIdle();
+}
+$('bStart').onclick = () => {
+  if (timer) return stopBreath();
+  $('bStart').innerHTML = T('■ 停止','■ Stop');
+  const seq = []; for (let r=0;r<3;r++) MODES[mode].forEach(p=>seq.push([...p,r+1]));
+  const total = seq.reduce((s,p)=>s+p[1],0);
+  let i=0, elapsed=0;
+  grow(0);
+  const step = () => {
+    if (i>=seq.length) {
+      timer=null; grow(1); $('seed').classList.remove('raining'); setPhase('in');
+      $('circle').innerHTML = '🌸'; $('phase').innerHTML = T('完成！','Done!'); $('bStart').innerHTML = T('▶ 再來一次','▶ Again');
+      $('bInfo').innerHTML = T('完成！你的花開了 🌸 感覺如何？','Done! Your flower bloomed 🌸 How do you feel?');
+      return;
+    }
+    const [kind,sec,round]=seq[i++]; let left=sec;
+    const c=$('circle'); setPhase(kind);
+    if (kind === 'in') scaleNow = 1; else if (kind === 'out') scaleNow = .55;
+    c.style.transitionDuration = `${sec}s, 1.2s, 1.2s`;
+    c.style.transform = `scale(${scaleNow})`;
+    $('bInfo').innerHTML = T(`第 ${round} / 3 輪`,`Round ${round} / 3`);
+    const icon = kind==='in' ? '☀️' : kind==='out' ? '🌧️' : '✨';
+    const tick = () => {
+      c.innerHTML = `${t(PH[kind].t)}<span style="font-family:'Baloo 2';font-size:30px;line-height:1">${left}</span>`;
+      $('phase').innerHTML = `${icon} ${T(PH[kind].t[0], PH[kind].t[1])} · ${left}`;
+      if (left-- > 0) timer = setTimeout(() => { elapsed++; grow(elapsed/total); tick(); }, 1000);
+      else step();
+    };
+    tick();
+  };
+  step();
+};
+
+// ---- PERMA+ 抽籤 ----
+let pSel = null; const drawn = {};
+const missionKey = 'sel_mission_' + new Date().toDateString();
+let mission = store.get(missionKey);
+function renderPerma(){
+  $('perma').innerHTML = PERMA.map((p,i) => `<button class="pm${pSel===i?' on':''}" data-i="${i}" style="background:${p.bg}"><b style="color:${p.c}">${p.k}</b><span>${t(p.name)}</span></button>`).join('');
+  $('perma').querySelectorAll('.pm').forEach(b => b.onclick = () => { pSel = +b.dataset.i; renderPerma(); });
+  const d = $('pdetail');
+  if (pSel === null) { d.classList.add('hidden'); return; }
+  const p = PERMA[pSel], got = drawn[pSel];
+  d.classList.remove('hidden');
+  d.style.background = p.bg;
+  d.innerHTML = `<h3 style="color:${p.c}">${p.k} · ${t(p.name)}</h3><p>${t(p.desc)}</p>
+    <div class="cup" id="cup">🎋</div>
+    <div class="stick${got!=null?'':' hidden'}" id="stick" style="border-color:${p.c}"><span class="no" style="background:${p.c}" id="stickNo"></span><div id="stickTxt"></div></div>
+    <div class="row2"><button class="btn" id="pDraw" style="background:linear-gradient(120deg,${p.c},${p.c}cc);box-shadow:0 5px 0 ${p.c}88">${got!=null?T('🔄 再抽一次','🔄 Draw again'):T('🎋 搖一搖，抽一支籤','🎋 Shake & draw')}</button>
+    ${got!=null?`<button class="btn ghost" id="pAccept">${T('⭐ 就決定是你了','⭐ I\'ll do this')}</button>`:''}</div>
+    ${mission?`<div class="mission">⭐ ${T('今日幸福任務：','Today\'s mission: ')}${esc(mission)}</div>`:''}`;
+  if (got != null) showStick(p, got, false);
+  $('pDraw').onclick = () => {
+    const cup = $('cup'); cup.classList.add('shake'); $('pDraw').disabled = true;
+    $('stick').classList.remove('hidden');
+    let n = 0;
+    const spin = setInterval(() => {
+      showStick(p, Math.floor(Math.random()*p.opts.length), false);
+      if (++n > 9) {
+        clearInterval(spin); cup.classList.remove('shake');
+        let j; do { j = Math.floor(Math.random()*p.opts.length); } while (j === drawn[pSel]);
+        drawn[pSel] = j; renderPerma(); showStick(p, j, true);
+      }
+    }, 110);
+  };
+  if ($('pAccept')) $('pAccept').onclick = () => {
+    mission = `${p.k}｜${plain(p.opts[drawn[pSel]])}`;
+    store.set(missionKey, mission); renderPerma();
+  };
+}
+function showStick(p, j, pop){
+  $('stickNo').textContent = plain([`第 ${j+1} 籤`, `Stick #${j+1}`]);
+  $('stickTxt').innerHTML = t(p.opts[j]);
+  if (pop) { const s = $('stick'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); }
+}
+
+setVisual(visual);
+setPhase('in');
+applyLang();
+</script>
+</body>
+</html>
