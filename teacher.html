@@ -260,18 +260,22 @@ const today = () => new Date(Date.now() - new Date().getTimezoneOffset()*60000).
 
 let D = null;            // 後台資料
 let filter = '', sortBy = 'status', timer = null;
-const isDemo = () => !st.get('t_url');
+/* ===== 預設連線（已寫入，學生頁網址與 Apps Script 網址不是機密；密碼不可寫在這裡）===== */
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwN27ZfouzwHoLQ7qnS_Edd77TQXOoF9850dhAsXNL1-DJfX-dMorMWwSquzCcJvVYU/exec';
+const DEFAULT_STU = 'https://weichenhung0116.github.io/SEL-checkin/';
+const cfg = { url: () => st.get('t_url') || DEFAULT_URL, stu: () => st.get('t_stu') || DEFAULT_STU };
+const isDemo = () => !cfg.url();
 
 /* ---------- API（未設定網址時使用示範資料）---------- */
 const api = {
   async get(p){
     if (isDemo()) return demo.get(p);
     const q = new URLSearchParams({ key: st.get('t_key'), ...p });
-    return (await fetch(st.get('t_url') + '?' + q)).json();
+    return (await fetch(cfg.url() + '?' + q)).json();
   },
   async post(body){
     if (isDemo()) return demo.post(body);
-    const r = await fetch(st.get('t_url'), { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ key: st.get('t_key'), ...body }) });
+    const r = await fetch(cfg.url(), { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ key: st.get('t_key'), ...body }) });
     return r.json();
   }
 };
@@ -323,6 +327,13 @@ const demo = (() => {
 })();
 
 /* ---------- 載入 ---------- */
+function askKey(){
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x.dataset.tab === 'setup'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.id === 't-setup'));
+  $('connMsg').innerHTML = '<span class="low">🔑 請輸入教師密碼，再按「儲存並連線」</span>';
+  $('demoTag').style.display = 'none';
+  $('key').value = ''; $('key').focus(); window.scrollTo({ top:0 });
+}
 async function load(silent){
   if (!silent) setLive('載入中 Loading…');
   try {
@@ -337,7 +348,10 @@ async function load(silent){
     }
     renderCourses(); renderAll();
     setLive('更新 ' + new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}));
-  } catch (e) { setLive('⚠️ ' + e.message); toast('載入失敗：' + e.message); }
+  } catch (e) {
+    setLive('⚠️ ' + e.message);
+    if (/密碼/.test(e.message)) askKey(); else toast('載入失敗：' + e.message);
+  }
 }
 let autoPicked = false;
 function pickLive(list){
@@ -590,7 +604,7 @@ $('fSave').onclick = async () => {
 
 /* ---------- QR Code ---------- */
 function renderQR(){
-  const base = st.get('t_stu'), c = D && D.course;
+  const base = cfg.stu(), c = D && D.course;
   if (!base || !c) return;
   const link = base.replace(/[?#].*$/, '') + '?course=' + encodeURIComponent(c);
   $('qrBox').innerHTML = `<div class="qr"><div class="code" id="qrc"></div><div class="link"><b>${esc(c)}</b><br><a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a><br><button class="btn ghost sm" id="copyLink" style="margin-top:8px">📋 複製連結</button></div></div><p class="muted">上課時投影這個 QR Code，學生掃描後課程會自動帶入。</p>`;
@@ -599,7 +613,7 @@ function renderQR(){
 }
 
 /* ---------- 連線設定 ---------- */
-$('url').value = st.get('t_url'); $('key').value = st.get('t_key'); $('stuUrl').value = st.get('t_stu');
+$('url').value = cfg.url(); $('key').value = st.get('t_key'); $('stuUrl').value = cfg.stu();
 $('saveConn').onclick = async () => {
   st.set('t_url', $('url').value.trim()); st.set('t_key', $('key').value); st.set('t_stu', $('stuUrl').value.trim());
   $('connMsg').textContent = '連線中…';
